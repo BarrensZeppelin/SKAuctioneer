@@ -332,7 +332,7 @@ end
 
 local function filterIncoming(self, event, ...)
 	local msg = ...;
-	return currentItem and (msg:lower() == greed or msg:lower() == "need") and SKAuctioneer_HideWhispers, ...;
+	return currentItem and (msg:lower() == "greed" or msg:lower() == "need") and SKAuctioneer_HideWhispers, ...;
 end
 
 ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", filterIncoming);
