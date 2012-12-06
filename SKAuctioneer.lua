@@ -3,8 +3,8 @@ local takers = {};
 local prefix = "[SKAuctioneer] ";
 
 -- index 1 er højest på listen
---TEST: SKAuctioneer_PlayerList = {"Emanorp", "Fluffywrath", "Bazìnga", "Sartharia", "Dreamheal", "Xitsi", "Apoulsen", "Esaya", "Korzul", "Parium"}; -- Til at starte med hardcoder jeg playerlisten, bagefter vil der komme et GUI til at sætte den op
-SKAuctioneer_PlayerList = {"Devmode", "Apoulsen"};
+SKAuctioneer_PlayerList = {"Emanorp", "Fluffywrath", "Bazìnga", "Sartharia", "Dreamheal", "Xitsi", "Apoulsen", "Esaya", "Korzul", "Parium"}; -- Til at starte med hardcoder jeg playerlisten, bagefter vil der komme et GUI til at sætte den op
+--TEST: SKAuctioneer_PlayerList = {"Devmode", "Apoulsen"};
 SKAuctioneer_Channel = "GUILD";
 SKAuctioneer_AuctionTime = 15; -- seconds
 SKAuctioneer_ACL = {}; -- Access control list
@@ -34,7 +34,7 @@ do
 		
 		-----------------------
 		for i=1, #needers do	-- Opbyg streng for needers
-			if #needers == 1 then
+			if i == 1 then
 				needString = needString..needers[i];
 			elseif i+1 > #needers then
 				needString = needString.." and "..needers[i];
@@ -47,7 +47,7 @@ do
 		
 		------------------------
 		for i=1, #greeders do	-- Opbyg streng for greeders
-			if #greeders == 1 then
+			if i == 1 then
 				greedString = greedString..greeders[i];
 			elseif i+1 > #greeders then
 				greedString = greedString.." and "..greeders[i];
@@ -133,25 +133,31 @@ do
 			end
 			
 			if #needers > 0 then -- dette stykke kode kører igennem listen fra 1 til maks og giver item til den første der optræder
+				local found = false;
 				for i=1, #SKAuctioneer_PlayerList do
 					for u=1, #needers do
 						if needers[u] == SKAuctioneer_PlayerList[i] then
+							SendChatMessage(needWinner:format(needers[u], currentItem), SKAuctioneer_Channel);
+							found = true;
 							suicidePlayer(needers[u]);
 							break;
 						end
 					end
+					if found then break; end
 				end
 				
 			else -- kun greeders, roll!
 				greedString = prefix.."No need, only greed";
 				for i=1, #takers do
-					if i+1 > #takers then
+					if i == 1 then
+						greedString = greedString.." "..takers[i].name; 
+					elseif i+1 > #takers then
 						greedString = greedString.." and "..takers[i].name;
 					else
 						greedString = greedString..", "..takers[i].name;
 					end
 				end
-				greedString = greedString.."; /roll  for "..currentItem.." now!";
+				greedString = "; "..greedString.." - /roll  for "..currentItem.." now!";
 				SendChatMessage(greedString, SKAuctioneer_Channel);
 			end
 		end
