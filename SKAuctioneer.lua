@@ -8,6 +8,7 @@ SKAuctioneer_PlayerList = {"Devmode", "Apoulsen"};
 SKAuctioneer_Channel = "GUILD";
 SKAuctioneer_AuctionTime = 15; -- seconds
 SKAuctioneer_ACL = {}; -- Access control list
+SKAuctioneer_HideWhispers = true;
 
 local startAuction, endAuction, placeWant, cancelAuction, sendStatus, onEvent;
 
@@ -76,7 +77,7 @@ end
 
 do
 	local auctionAlreadyRunning = "There is already an auction running on %s!";
-	local startingAuction = prefix.."Starting auction for %s, whisper me \"need\" or \"greed\" to state your status. Remaining time: %d seconds.";
+	local startingAuction = prefix.."Starting auction for %s, whisper me \"need\" or \"greed\" to declare your status. Remaining time: %d seconds.";
 	
 	function startAuction(item, starter)
 		if currentItem then
@@ -95,6 +96,18 @@ do
 	end
 end
 
+do
+	local cancelled = prefix.."Auction cancelled by %s.";
+	
+	function cancelAuction(sender)
+		currentItem = nil;
+		table.wipe(takers);
+		_Timer_Unschedule(SendChatMessage);
+		_Timer_Unschedule(endAuction);
+		_Timer_Unschedule(sendStatus);
+		SendChatMessage(cancelled:format(sender or UnitName("player")), SKAuctioneer_Channel);
+	end
+end
 
 do
 	local noTakers = prefix.."Noone wants %s, disenchant it!";
@@ -151,7 +164,7 @@ end
 do
 	local greedUnavailable = prefix.."You can no longer place/change to greed on %s since it has already been needed.";
 	local bidPlaced = prefix.."Your bid of status: \"%s\" on %s has been registered and/or updated.";
-	local alreadyGreed = prefix.."You have already greeded on %s!";
+	local alreadyBid = prefix.."You have already %sed on %s!";
 	
 	function onEvent(self, event, msg, sender)
 		if event == "CHAT_MSG_WHISPER" and currentItem and (msg:lower()=="greed" or msg:lower()=="need") then
@@ -170,7 +183,10 @@ do
 			for i=1, #takers do
 				if takers[i].name == sender then
 					if msg:lower() == "greed" and takers[i].status == "greed" then
-						SendChatMessage(alreadyGreed:format(currentItem), "WHISPER", nil, sender);
+						SendChatMessage(alreadyBid:format(msg:lower(), currentItem), "WHISPER", nil, sender);
+						return;
+					elseif msg:lower() == "need" and takers[i].status == "need" then
+						SendChatMessage(alreadyBid:format(msg:lower(), currentItem), "WHISPER", nil, sender);
 						return;
 					else
 						takers[i].status = msg:lower();
@@ -193,12 +209,25 @@ do
 			_Timer_Unschedule(sendStatus);
 			_Timer_Schedule(2, sendStatus);
 			_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_AuctionTime/2), SKAuctioneer_Channel);
+		
+		elseif SKAuctioneer_ACL[sender] then
+			local cmd, arg = msg:match("^!(%w+)%s*(.*)");
+			if cmd and cmd:lower() == "auction" and arg then
+				startAuction(arg, sender);
+			elseif cmd and cmd:lower() == "cancel" then
+				cancelAuction(sender);
+			end
 		end
 	end
 end
 
 local frame = CreateFrame("Frame");
 frame:RegisterEvent("CHAT_MSG_WHISPER");
+frame:RegisterEvent("CHAT_MSG_RAID");
+frame:RegisterEvent("CHAT_MSG_RAID_LEADER");
+frame:RegisterEvent("CHAT_MSG_OFFICER");
+frame:RegisterEvent("CHAT_MSG_GUILD");
+frame:RegisterEvent("CHAT_MSG_SAY");
 frame:SetScript("OnEvent", onEvent);
 
 SLASH_SKAuctioneer1 = "/ska";
@@ -226,6 +255,7 @@ do
 		table.insert(usage, " - acl add <players> - Adds <players> separated by spaces to the ACL.");
 		table.insert(usage, " - acl remove <players> - Removes <players> from the ACL.");
 		table.insert(usage, " - playerlist - Lists the PlayerList in text-form.");
+		table.insert(usage, " - hidechat <0/1> - Hides incoming and outgoing whispers if true.");
 	
 	local function addToACL(...)
 		for i=1, select("#", ...) do
@@ -279,6 +309,14 @@ do
 			for i=1, #SKAuctioneer_PlayerList do
 				print(i..".".." "..SKAuctioneer_PlayerList[i]);
 			end
+		elseif cmd == "hidechat" and tonumber(arg) then
+			if tonumber(arg) == 0 then 
+				SKAuctioneer_HideWhispers = false;
+				print("SKA now shows chat created by auctions.");
+			else
+				SKAuctioneer_HideWhispers = true;
+				print("SKA no longer shows chat created by auctions.");
+			end
 		else
 			for i=1, #usage do
 				print(usage[i]);
@@ -286,5 +324,18 @@ do
 		end
 	end
 end
+
+local function filterOutgoing(self, event, ...)
+	local msg = ...;
+	return msg:sub(0, prefix:len()) == prefix and SKAuctioneer_HideWhispers, ...;
+end
+
+local function filterIncoming(self, event, ...)
+	local msg = ...;
+	return currentItem and (msg:lower() == greed or msg:lower == "need") and SKAuctioneer_HideWhispers, ...;
+end
+
+ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", filterIncoming);
+ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutgoing);
 
 print("Loaded SKAuctioneer by Absolute Zero / Al'Akir(EU)");
