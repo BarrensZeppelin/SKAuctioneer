@@ -1,9 +1,10 @@
-local currentItem;
+Ôªølocal currentItem;
 local takers = {};
 local prefix = "[SKAuctioneer] ";
 
--- index 1 er h¯jest pÂ listen
-SKAuctioneer_PlayerList = {"Emanorp", "Fluffywrath", "BazÏnga", "Sartharia", "Dreamheal", "Xitsi", "Apoulsen", "Esaya", "Korzul", "Parium"}; -- Til at starte med hardcoder jeg playerlisten, bagefter vil der komme et GUI til at sÊtte den op
+-- index 1 er h√∏jest p√• listen
+SKAuctioneer_PlayerList = {"Emanorp", "Fluffywrath", "Baz√¨nga", "Sartharia", "Dreamheal", "Xitsi", "Apoulsen", "Esaya", "Korzul", "Parium"}; -- Til at starte med hardcoder jeg playerlisten, bagefter vil der komme et GUI til at s√¶tte den op
+--TEST: SKAuctioneer_PlayerList = {"Devmode", "Apoulsen"};
 SKAuctioneer_Channel = "GUILD";
 SKAuctioneer_AuctionTime = 15; -- seconds
 SKAuctioneer_ACL = {}; -- Access control list
@@ -26,7 +27,7 @@ do
 			if takers[i].status == "greed" then
 				table.insert(greeders, takers[i].name);
 			else
-				table.insert(needers, takera[i].name);
+				table.insert(needers, takers[i].name);
 			end
 		end
 		
@@ -56,8 +57,8 @@ do
 		greedString = greedString..".";
 		-------------------------
 		
-		SendChatMessage(printNeedStatus:format(needString), SKAuctioneer_Channel);
-		SendChatMessage(printGreedStatus:format(greedString), SKAuctioneer_Channel);
+		if #needers > 0 then SendChatMessage(printNeedStatus:format(needString), SKAuctioneer_Channel); end
+		if #greeders > 0 then SendChatMessage(printGreedStatus:format(greedString), SKAuctioneer_Channel); end
 		_Timer_Unschedule(endAuction); 	_Timer_Schedule(10, endAuction); -- Reschedule endAuction to end in 10 seconds, so people have time to react
 		SendChatMessage(auctionProgress:format(currentItem, 10), SKAuctioneer_Channel);
 	end
@@ -108,7 +109,7 @@ do
 				SendChatMessage(greedWinner:format(takers[1].name, currentItem), SKAuctioneer_Channel);
 			else
 				SendChatMessage(needWinner:format(takers[1].name, currentItem), SKAuctioneer_Channel);
-				suicidePlayer(takers[i].name);
+				suicidePlayer(takers[1].name);
 			end
 		else
 			needers = {};
@@ -118,7 +119,7 @@ do
 				end
 			end
 			
-			if #needers > 0 then -- dette stykke kode k¯rer igennem listen fra 1 til maks og giver item til den f¯rste der optrÊder
+			if #needers > 0 then -- dette stykke kode k√∏rer igennem listen fra 1 til maks og giver item til den f√∏rste der optr√¶der
 				for i=1, #SKAuctioneer_PlayerList do
 					for u=1, #needers do
 						if needers[u] == SKAuctioneer_PlayerList[i] then
@@ -168,29 +169,30 @@ do
 			
 			for i=1, #takers do
 				if takers[i].name == sender then
-					if msg:lower()=="greed" and takers[i].status = "greed" then
+					if msg:lower() == "greed" and takers[i].status == "greed" then
 						SendChatMessage(alreadyGreed:format(currentItem), "WHISPER", nil, sender);
 						return;
 					else
+						takers[i].status = msg:lower();
 						SendChatMessage(bidPlaced:format(msg:lower(), currentItem), "WHISPER", nil, sender);
 						
 						_Timer_Extend(3, endAuction);
 						_Timer_Unschedule(sendStatus);
 						_Timer_Schedule(2, sendStatus);
-						_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_Time/2), SKAuctioneer_Channel);
+						_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_AuctionTime/2), SKAuctioneer_Channel);
 						return;
 					end
 				end
 			end
 			
-			-- Personen har endnu ikke budt pÂ gearet, sÂ vi oprÊtter ham i takers
+			-- Personen har endnu ikke budt p√• gearet, s√• vi opr√¶tter ham i takers
 			table.insert(takers, {name = sender, status = msg:lower()});
 			SendChatMessage(bidPlaced:format(msg:lower(), currentItem), "WHISPER", nil, sender);
 			
 			_Timer_Extend(endAuction, 3);
 			_Timer_Unschedule(sendStatus);
 			_Timer_Schedule(2, sendStatus);
-			_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_Time/2), SKAuctioneer_Channel);
+			_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_AuctionTime/2), SKAuctioneer_Channel);
 		end
 	end
 end
@@ -204,15 +206,25 @@ SLASH_SKAuctioneer2 = "/skauc";
 SLASH_SKAuctioneer3 = "/skauctioneer";
 
 do
-	-- handle slash commands
-	
+	-- handle slash commands	
 	local setChannel = "Channel is now \"%s\"";
-	local setTime = "Auction time is now %s";
+	local setTime = "Auction time is now %s seconds";
 	local addedToACL = "Added %s player(s) to the ACL";
 	local removedFromACL = "Removed %s player(s) from the ACL";
 	local currChannel = "Channel is currently set to %s";
-	local currTime = "Auction time is currently set to %s";
+	local currTime = "Auction time is currently set to %s seconds";
 	local ACL = "Access Control List:";
+	local usage = {};
+		table.insert(usage, "/ska");
+		table.insert(usage, " - start <item> - Starts an auction for the selected item.");
+		table.insert(usage, " - stop - Cancels the current auction.");
+		table.insert(usage, " - channel - Returns the current channel used by SKA.");
+		table.insert(usage, " - channel <channel> - Sets the channel SKA should use.");
+		table.insert(usage, " - time - Returns the current Time auctions run for.");
+		table.insert(usage, " - time <time> - Adjusts the amount of time auctions run for.");
+		table.insert(usage, " - acl - Returns the Access Control List.");
+		table.insert(usage, " - acl add <players> - Adds <players> separated by spaces to the ACL.");
+		table.insert(usage, " - acl remove <players> - Removes <players> from the ACL.");
 	
 	local function addToACL(...)
 		for i=1, select("#", ...) do
@@ -221,7 +233,7 @@ do
 		print(addedToACL:format(select("#", ...)));
 	end
 	
-	local function addToACL(...)
+	local function removeFromACL(...)
 		for i=1, select("#", ...) do
 			SKAuctioneer_ACL[select(i, ...)] = nil;
 		end
@@ -250,7 +262,7 @@ do
 			else
 				print(currTime:format(SKAuctioneer_AuctionTime));
 			end
-		elseif cmd = "acl" then
+		elseif cmd == "acl" then
 			if not arg then
 				print(ACL);
 				for k, v in pairs(SKAuctioneer_ACL) do
@@ -261,6 +273,12 @@ do
 			elseif arg:lower() == "remove" then
 				removeFromACL(select(3, string.split(" ", msg)));
 			end
+		else
+			for i=1, #usage do
+				print(usage[i]);
+			end
 		end
 	end
 end
+
+print("Loaded SKAuctioneer by Absolute Zero / Al'Akir(EU)");
