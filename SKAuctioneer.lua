@@ -174,7 +174,7 @@ do
 					else
 						SendChatMessage(bidPlaced:format(msg:lower(), currentItem), "WHISPER", nil, sender);
 						
-						_Timer_Extend(endAuction, 3);
+						_Timer_Extend(3, endAuction);
 						_Timer_Unschedule(sendStatus);
 						_Timer_Schedule(2, sendStatus);
 						_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_Time/2), SKAuctioneer_Channel);
