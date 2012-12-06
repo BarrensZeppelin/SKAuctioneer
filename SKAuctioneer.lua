@@ -3,8 +3,8 @@ local takers = {};
 local prefix = "[SKAuctioneer] ";
 
 -- index 1 er højest på listen
-SKAuctioneer_PlayerList = {"Emanorp", "Fluffywrath", "Bazìnga", "Sartharia", "Dreamheal", "Xitsi", "Apoulsen", "Esaya", "Korzul", "Parium"}; -- Til at starte med hardcoder jeg playerlisten, bagefter vil der komme et GUI til at sætte den op
---TEST: SKAuctioneer_PlayerList = {"Devmode", "Apoulsen"};
+--TEST: SKAuctioneer_PlayerList = {"Emanorp", "Fluffywrath", "Bazìnga", "Sartharia", "Dreamheal", "Xitsi", "Apoulsen", "Esaya", "Korzul", "Parium"}; -- Til at starte med hardcoder jeg playerlisten, bagefter vil der komme et GUI til at sætte den op
+SKAuctioneer_PlayerList = {"Devmode", "Apoulsen"};
 SKAuctioneer_Channel = "GUILD";
 SKAuctioneer_AuctionTime = 15; -- seconds
 SKAuctioneer_ACL = {}; -- Access control list
@@ -189,7 +189,7 @@ do
 			table.insert(takers, {name = sender, status = msg:lower()});
 			SendChatMessage(bidPlaced:format(msg:lower(), currentItem), "WHISPER", nil, sender);
 			
-			_Timer_Extend(endAuction, 3);
+			_Timer_Extend(4, endAuction);
 			_Timer_Unschedule(sendStatus);
 			_Timer_Schedule(2, sendStatus);
 			_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_AuctionTime/2), SKAuctioneer_Channel);
@@ -225,6 +225,7 @@ do
 		table.insert(usage, " - acl - Returns the Access Control List.");
 		table.insert(usage, " - acl add <players> - Adds <players> separated by spaces to the ACL.");
 		table.insert(usage, " - acl remove <players> - Removes <players> from the ACL.");
+		table.insert(usage, " - playerlist - Lists the PlayerList in text-form.");
 	
 	local function addToACL(...)
 		for i=1, select("#", ...) do
@@ -272,6 +273,11 @@ do
 				addToACL(select(3, string.split(" ", msg)));
 			elseif arg:lower() == "remove" then
 				removeFromACL(select(3, string.split(" ", msg)));
+			end
+		elseif cmd == "playerlist" then
+			print("PlayerList:");
+			for i=1, #SKAuctioneer_PlayerList do
+				print(i..".".." "..SKAuctioneer_PlayerList[i]);
 			end
 		else
 			for i=1, #usage do
