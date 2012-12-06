@@ -98,14 +98,19 @@ end
 
 do
 	local cancelled = prefix.."Auction cancelled by %s.";
+	local noAuction = prefix.."There is not ongoing auction to cancel.":
 	
 	function cancelAuction(sender)
-		currentItem = nil;
-		table.wipe(takers);
-		_Timer_Unschedule(SendChatMessage);
-		_Timer_Unschedule(endAuction);
-		_Timer_Unschedule(sendStatus);
-		SendChatMessage(cancelled:format(sender or UnitName("player")), SKAuctioneer_Channel);
+		if currentItem then
+			currentItem = nil;
+			table.wipe(takers);
+			_Timer_Unschedule(SendChatMessage);
+			_Timer_Unschedule(endAuction);
+			_Timer_Unschedule(sendStatus);
+			SendChatMessage(cancelled:format(sender or UnitName("player")), SKAuctioneer_Channel);
+		else
+			SendChatMessage(noAuction, "WHISPER", nil, sender);
+		end
 	end
 end
 
@@ -143,11 +148,11 @@ do
 							break;
 						end
 					end
-					if found then break; end
+					if found then break; else print("Error: Needer not found in the PlayerList!"); end
 				end
 				
 			else -- kun greeders, roll!
-				greedString = prefix.."No need, only greed";
+				greedString = prefix.."No need, only greed;";
 				for i=1, #takers do
 					if i == 1 then
 						greedString = greedString.." "..takers[i].name; 
@@ -157,7 +162,7 @@ do
 						greedString = greedString..", "..takers[i].name;
 					end
 				end
-				greedString = "; "..greedString.." - /roll  for "..currentItem.." now!";
+				greedString = greedString.." - /roll  for "..currentItem.." now!";
 				SendChatMessage(greedString, SKAuctioneer_Channel);
 			end
 		end
