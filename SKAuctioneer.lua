@@ -205,4 +205,62 @@ SLASH_SKAuctioneer3 = "/skauctioneer";
 
 do
 	-- handle slash commands
+	
+	local setChannel = "Channel is now \"%s\"";
+	local setTime = "Auction time is now %s";
+	local addedToACL = "Added %s player(s) to the ACL";
+	local removedFromACL = "Removed %s player(s) from the ACL";
+	local currChannel = "Channel is currently set to %s";
+	local currTime = "Auction time is currently set to %s";
+	local ACL = "Access Control List:";
+	
+	local function addToACL(...)
+		for i=1, select("#", ...) do
+			SKAuctioneer_ACL[select(i, ...)] = true;
+		end
+		print(addedToACL:format(select("#", ...)));
+	end
+	
+	local function addToACL(...)
+		for i=1, select("#", ...) do
+			SKAuctioneer_ACL[select(i, ...)] = nil;
+		end
+		print(removedFromACL:format(select("#", ...)));
+	end
+	
+	SlashCmdList["SKAuctioneer"] = function(msg)
+		local cmd, arg = string.split(" ", msg);
+		cmd = cmd:lower();
+		
+		if cmd == "start" and arg then
+			startAuction(msg:match("^start%s+(.+)")) -- extract the item link
+		elseif cmd == "stop" then
+			cancelAuction();
+		elseif cmd == "channel" then
+			if arg then
+				SKAuctioneer_Channel = arg:upper();
+				print(setChannel:format(SKAuctioneer_Channel));
+			else
+				print(currChannel:format(SKAuctioneer_Channel));
+			end
+		elseif cmd == "time" then
+			if arg and tonumber(arg) then
+				SKAuctioneer_AuctionTime = tonumber(arg);
+				print(setTime:format(SKAuctioneer_AuctionTime));
+			else
+				print(currTime:format(SKAuctioneer_AuctionTime));
+			end
+		elseif cmd = "acl" then
+			if not arg then
+				print(ACL);
+				for k, v in pairs(SKAuctioneer_ACL) do
+					print(k);
+				end
+			elseif arg:lower() == "add" then
+				addToACL(select(3, string.split(" ", msg)));
+			elseif arg:lower() == "remove" then
+				removeFromACL(select(3, string.split(" ", msg)));
+			end
+		end
+	end
 end
