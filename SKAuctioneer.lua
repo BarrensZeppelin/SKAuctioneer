@@ -8,9 +8,60 @@ SKAuctioneer_Channel = "GUILD";
 SKAuctioneer_AuctionTime = 15; -- seconds
 SKAuctioneer_ACL = {}; -- Access control list
 
-local startAuction, endAuction, placeWant, cancelAuction, onEvent;
+local startAuction, endAuction, placeWant, cancelAuction, sendStatus, onEvent;
 
 local auctionProgress = prefix.."Time remaining for %s: %d seconds.";
+local noBidsYet = prefix.."There are no current bids on %s, time remaining on auction is %d seconds";
+
+do
+	local printNeedStatus = prefix.."Need: %s";
+	local printGreedStatus = prefix.."Greed: %s";
+	
+	function sendStatus()
+		local needString = "";
+		local greedString = "";
+		
+		needers = {}; greeders = {};
+		for i=1, #takers do
+			if takers[i].status == "greed" then
+				table.insert(greeders, takers[i].name);
+			else
+				table.insert(needers, takera[i].name);
+			end
+		end
+		
+		-----------------------
+		for i=1, #needers do	-- Opbyg streng for needers
+			if #needers == 1 then
+				needString = needString..needers[i];
+			elseif i+1 > #needers then
+				needString = needString.." and "..needers[i];
+			else 
+				needString = needString..", "..needers[i];
+			end
+		end
+		needString = needString..".";
+		------------------------
+		
+		------------------------
+		for i=1, #greeders do	-- Opbyg streng for greeders
+			if #greeders == 1 then
+				needString = needString..greeders[i];
+			elseif i+1 > #greeders then
+				needString = needString.." and "..greeders[i];
+			else 
+				needString = needString..", "..greeders[i];
+			end
+		end
+		needString = needString..".";
+		-------------------------
+		
+		SendChatMessage(printNeedStatus:format(needString), SKAuctioneer_Channel);
+		SendChatMessage(printGreedStatus:format(greedString), SKAuctioneer_Channel);
+		_Timer_Unschedule(endAuction); 	_Timer_Schedule(10, endAuction); -- Reschedule endAuction to end in 10 seconds, so people have time to react
+		SendChatMessage(auctionProgress:format(currentItem, 10), SKAuctioneer_Channel);
+	end
+end
 
 local function suicidePlayer(name)
 	for i=1, #SKAuctioneer_PlayerList do
@@ -21,10 +72,10 @@ local function suicidePlayer(name)
 	end
 end
 
+
 do
 	local auctionAlreadyRunning = "There is already an auction running on %s!";
 	local startingAuction = prefix.."Starting auction for %s, whisper me \"need\" or \"greed\" to state your status. Remaining time: %d seconds.";
-	local noBidsYet = prefix.."There are no current bids on %s, time remaining on auction is %d seconds";
 	
 	function startAuction(item, starter)
 		if currentItem then
@@ -42,6 +93,7 @@ do
 		end
 	end
 end
+
 
 do
 	local noTakers = prefix.."Noone wants %s, disenchant it!";
@@ -95,9 +147,6 @@ do
 	end
 end
 
--- Remember to unschedule the "No bids have been sent"
-
-
 do
 	local greedUnavailable = prefix.."You can no longer place/change to greed on %s since it has already been needed.";
 	local bidPlaced = prefix.."Your bid of status: \"%s\" on %s has been registered and/or updated.";
@@ -124,6 +173,11 @@ do
 						return;
 					else
 						SendChatMessage(bidPlaced:format(msg:lower(), currentItem), "WHISPER", nil, sender);
+						
+						_Timer_Extend(endAuction, 3);
+						_Timer_Unschedule(sendStatus);
+						_Timer_Schedule(2, sendStatus);
+						_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_Time/2), SKAuctioneer_Channel);
 						return;
 					end
 				end
@@ -132,6 +186,11 @@ do
 			-- Personen har endnu ikke budt på gearet, så vi oprætter ham i takers
 			table.insert(takers, {name = sender, status = msg:lower()});
 			SendChatMessage(bidPlaced:format(msg:lower(), currentItem), "WHISPER", nil, sender);
+			
+			_Timer_Extend(endAuction, 3);
+			_Timer_Unschedule(sendStatus);
+			_Timer_Schedule(2, sendStatus);
+			_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_Time/2), SKAuctioneer_Channel);
 		end
 	end
 end
