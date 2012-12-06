@@ -46,14 +46,14 @@ do
 		------------------------
 		for i=1, #greeders do	-- Opbyg streng for greeders
 			if #greeders == 1 then
-				needString = needString..greeders[i];
+				greedString = greedString..greeders[i];
 			elseif i+1 > #greeders then
-				needString = needString.." and "..greeders[i];
+				greedString = greedString.." and "..greeders[i];
 			else 
-				needString = needString..", "..greeders[i];
+				greedString = greedString..", "..greeders[i];
 			end
 		end
-		needString = needString..".";
+		greedString = greedString..".";
 		-------------------------
 		
 		SendChatMessage(printNeedStatus:format(needString), SKAuctioneer_Channel);
