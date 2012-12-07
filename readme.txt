@@ -5,9 +5,9 @@ AddOn is created around the Suicide Kings(SK) loot distribution system.
 Information about SK loot system can be found here: http://www.wowwiki.com/Suicide_Kings.
 
 To Install:
-Extract SKAuctioneer-master.zip to /Interface/AddOns/
-Extract _Timer (found inside SKAuctioneer-master) to /Interface/AddOns/
-Open WoW and make sure SKAuctionner-master and _Timer is selected
+Extract SKAuctioneer.zip to /Interface/AddOns/
+Extract _Timer (found inside SKAuctioneer) to /Interface/AddOns/
+Open WoW and make sure SKAuctioneer and _Timer is selected
 
 
 
