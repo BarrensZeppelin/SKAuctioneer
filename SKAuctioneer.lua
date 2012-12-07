@@ -98,7 +98,7 @@ end
 
 do
 	local cancelled = prefix.."Auction cancelled by %s.";
-	local noAuction = prefix.."There is not ongoing auction to cancel.":
+	local noAuction = prefix.."There is no ongoing auction to cancel.":
 	
 	function cancelAuction(sender)
 		if currentItem then
