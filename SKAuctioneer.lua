@@ -76,7 +76,7 @@ end
 
 
 do
-	local auctionAlreadyRunning = "There is already an auction running on %s!";
+	local auctionAlreadyRunning = "There is already an auction running for %s! Wait until it has ended before starting a new one.";
 	local startingAuction = prefix.."Starting auction for %s, whisper me \"need\" or \"greed\" to declare your status. Remaining time: %d seconds.";
 	
 	function startAuction(item, starter)
@@ -336,6 +336,7 @@ do
 	end
 end
 
+
 local function filterOutgoing(self, event, ...)
 	local msg = ...;
 	return msg:sub(0, prefix:len()) == prefix and SKAuctioneer_HideWhispers, ...;
@@ -349,4 +350,4 @@ end
 ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", filterIncoming);
 ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutgoing);
 
-print("Loaded SKAuctioneer by Absolute Zero / Al'Akir(EU)");
+print("Loaded |cFF42E80CSKAuctioneer|r by |cFF90E80CAbsolute Zero / Al'Akir(EU)|r");
