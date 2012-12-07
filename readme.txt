@@ -2,7 +2,7 @@ SKAuctioneer created by Oskar Veileborg (Esaya) and Anders Poulsen (Apoulsen) fo
 
 
 AddOn is created around the Suicide Kings(SK) loot distribution system.
-Information about SK can be found here: http://www.wowwiki.com/Suicide_Kings.
+Information about SK loot system can be found here: http://www.wowwiki.com/Suicide_Kings.
 
 To Install:
 Extract SKAuctioneer-master.zip to /Interface/AddOns/
