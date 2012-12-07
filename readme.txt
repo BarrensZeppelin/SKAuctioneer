@@ -8,3 +8,8 @@ To Install:
 Extract SKAuctioneer-master.zip to /Interface/AddOns/
 Extract _Timer (found inside SKAuctioneer-master) to /Interface/AddOns/
 Open WoW and make sure SKAuctionner-master and _Timer is selected
+
+
+
+Changelog:
+0.1 - AddOn Created
