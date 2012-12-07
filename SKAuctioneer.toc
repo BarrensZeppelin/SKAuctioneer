@@ -4,4 +4,5 @@
 ## Dependencies: _Timer
 ## SavedVariables: SKAuctioneer_Channel, SKAuctioneer_AuctionTime, SKAuctioneer_ACL, SKAuctioneer_PlayerList, SKAuctioneer_HideWhispers
 
+SKAuctioneer.xml
 SKAuctioneer.lua
