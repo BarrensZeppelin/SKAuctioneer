@@ -336,7 +336,7 @@ do
 	end
 end
 
-
+--	Filter Whispers created by the addon if setting is enables
 local function filterOutgoing(self, event, ...)
 	local msg = ...;
 	return msg:sub(0, prefix:len()) == prefix and SKAuctioneer_HideWhispers, ...;
@@ -349,5 +349,14 @@ end
 
 ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", filterIncoming);
 ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutgoing);
+
+
+
+
+--[[ Todo:
+	- Frame beside lootwindow to start auctions
+	- GUI PlayerList editor : In process!
+	- Add all settings to a table (SKA_Settings) and parse that as the only SavedVariable
+	END]]
 
 print("Loaded |cFF42E80CSKAuctioneer|r by |cFF90E80CAbsolute Zero / Al'Akir(EU)|r");
