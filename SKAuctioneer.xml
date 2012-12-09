@@ -1,7 +1,72 @@
-<Ui xmlns="http://www.blizzard.com/wow/ui"
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.blizzard.com/wow/ui ..\FrameXML\UI.xsd">
-	<Frame name="SKA_PlayerList_Editor" parent="UIParent">
+	<Frame name="SKA_PlayerList_ListItemTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="0" y="20" />
+		</Size>
+		
+		<Anchors>
+			<Anchor point="LEFT" />
+			
+			<Anchor point="RIGHT" />
+		</Anchors>
+		
+		<Frames>
+			<Button name="$parent_DelButton" inherits="UIPanelCloseButton">
+				<Anchors>
+					<Anchor point="RIGHT">
+						<Offset> <AbsDimension x="-5" y="0" /> </Offset>
+					</Anchor>
+				</Anchors>
+				
+				<Scripts>
+					<OnLoad>
+						self:SetScale(0.8, 0.8);
+					</OnLoad>
+					
+					<OnClick>
+					</OnClick>
+				</Scripts>
+			</Button>
+			
+			<Button name="$parent_DownButton" inherits="UIPanelScrollDownButtonTemplate">
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parent_DelButon" relativePoint="LEFT">
+						<Offset> <AbsDimension x="-2" y="0" /> </Offset> 
+					</Anchor>
+				</Anchors>
+				
+				<Scripts>
+					<OnLoad>
+						print("uruguay!");
+					</OnLoad>
+				</Scripts>
+			</Button>
+		</Frames>
+	</Frame>
+	
+	<Frame name="SKA_PlayerList_Editor" parent="UIParent" hidden="true"
+		enableMouse="true" movable="true" clampedToScreen="true">
+		<Scripts>
+			<OnLoad>
+				self:RegisterForDrag("LeftButton");
+				self:SetUserPlaced(1);
+			</OnLoad>
+			
+			<OnDragStart>
+				self:StartMoving();
+			</OnDragStart>
+			
+			<OnDragStop>
+				self:StopMovingOrSizing()
+			</OnDragStop>
+		</Scripts>
+		
+		<Size>
+			<AbsDimension x="320" y="350" />
+		</Size>
+		
 		<Anchors>
 			<Anchor point="LEFT" relativePoint="CENTER">
 				<Offset>
@@ -9,21 +74,97 @@
 				</Offset>
 			</Anchor>
 		</Anchors>
-		<Size>
-			<AbsDimension x="384" y="350" />
-		</Size>
 		
 		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true"
-			edgeFile="Interface\DialogFrame\UI_DialogBox-Border">
+			edgeFile="Interface\DialogFrame\UI-DialogBox-Border">
 			<TileSize>
 				<AbsValue val="32" />
 			</TileSize>
+			
 			<EdgeSize>
 				<AbsValue val="32" />
 			</EdgeSize>
+			
 			<BackgroundInsets>
 				<AbsInset left="11" right="12" top="12" bottom="11" />
 			</BackgroundInsets>
 		</Backdrop>
+		
+		
+		<!-- Actual content of the Frame -->
+		
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parentTitle" file="Interface\DialogFrame\UI-DialogBox-Header">
+					<Size>
+						<AbsDimension x="375" y="64" />
+					</Size>
+					
+					<Anchors>
+						<Anchor point="TOP">
+							<Offset>
+								<AbsDimension x="0" y="12" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				
+				<FontString inherits="GameFontNormal" text="[SKA] Player List:">
+					<Anchors>
+						<Anchor point="TOP" relativeTo="$parentTitle">
+							<Offset>
+								<AbsDimension x="0" y="-14" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		
+		<Frames>
+			<!--<EditBox name="$parentEditBox" inherits="InputBoxTemplate">
+				<Anchors>
+					<Anchor point="CENTER">
+						<Offset>
+							<AbsDimension x="0" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				
+				<Size>
+					<AbsDimension x="200" y="100" />
+				</Size>
+			</EditBox> -->
+			
+			<Button name="$parent_CloseButton" inherits="UIPanelCloseButton">
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset> <AbsDimension x="-5" y="-5" /> </Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Frame name="$parent_ListFrame">
+				<Size>
+					<AbsDimension x="290" y="225" />
+				</Size>
+				
+				<Anchors>
+					<Anchor point="TOP">
+						<Offset> <AbsDimension x="0" y="-40" /> </Offset>
+					</Anchor>
+				</Anchors>
+				
+				<Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+					<EdgeSize>
+						<AbsValue val="16" />
+					</EdgeSize>
+					
+					<TileSize>
+						<AbsValue val="16" />
+					</TileSize>
+				</Backdrop>
+			</Frame>
+		</Frames>
 	</Frame>
 </Ui>

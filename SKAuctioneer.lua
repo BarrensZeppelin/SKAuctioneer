@@ -12,6 +12,7 @@ SKAuctioneer_HideWhispers = true;
 
 local startAuction, endAuction, placeWant, cancelAuction, sendStatus, onEvent;
 
+
 local auctionProgress = prefix.."Time remaining for %s: %d seconds.";
 local noBidsYet = prefix.."There are no current bids on %s, time remaining on auction is %d seconds";
 
@@ -316,10 +317,14 @@ do
 				removeFromACL(select(3, string.split(" ", msg)));
 			end
 		elseif cmd == "playerlist" then
+			----- TEMPORARY SOLUTION
 			print("PlayerList:");
 			for i=1, #SKAuctioneer_PlayerList do
 				print(i..".".." "..SKAuctioneer_PlayerList[i]);
 			end
+			---------------------------------
+			
+			SKA_PlayerList_Editor:Show();
 		elseif cmd == "hidechat" and tonumber(arg) then
 			if tonumber(arg) == 0 then 
 				SKAuctioneer_HideWhispers = false;
@@ -358,5 +363,28 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutgoing);
 	- GUI PlayerList editor : In process!
 	- Add all settings to a table (SKA_Settings) and parse that as the only SavedVariable
 	END]]
+	
+
+	
+-- GUI STUFF BELOW:
+SKA_PlayerList_Editor:SetFrameStrata("DIALOG");
+
+-- Populate SKA_PlayerList_Editor_ListFrame
+for i=1, #SKAuctioneer_PlayerList do
+	local frame = CreateFrame("Frame", SKA_PlayerList_Editor_ListFrame:GetName().."_ListItem"..i, SKA_PlayerList_Editor_ListFrame, "SKA_PlayerList_ListItemTemplate");
+	
+	if i==1 then
+		frame:SetPoint("TOP");
+	else
+		frame:SetPoint("TOP", frame:GetParent():GetName().."_ListItem"..(i-1), "BOTTOM");
+	end
+	
+	local fString = frame:CreateFontString(frame:GetName().."_NameString", ARTWORK, "GameFontNormal");
+	fString:SetText(SKAuctioneer_PlayerList[i]);
+	fString:SetPoint("CENTER");
+end
+
+SKA_PlayerList_Editor:Show();
+
 
 print("Loaded |cFF42E80CSKAuctioneer|r by |cFF90E80CAbsolute Zero / Al'Akir(EU)|r");
