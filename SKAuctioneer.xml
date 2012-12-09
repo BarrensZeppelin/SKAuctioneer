@@ -36,12 +36,6 @@
 						<Offset> <AbsDimension x="-2" y="0" /> </Offset> 
 					</Anchor>
 				</Anchors>
-				
-				<Scripts>
-					<OnLoad>
-						print("uruguay!");
-					</OnLoad>
-				</Scripts>
 			</Button>
 		</Frames>
 	</Frame>
@@ -146,12 +140,12 @@
 			
 			<Frame name="$parent_ListFrame">
 				<Size>
-					<AbsDimension x="290" y="225" />
+					<AbsDimension x="270" y="225" />
 				</Size>
 				
 				<Anchors>
-					<Anchor point="TOP">
-						<Offset> <AbsDimension x="0" y="-40" /> </Offset>
+					<Anchor point="TOPLEFT">
+						<Offset> <AbsDimension x="15" y="-40" /> </Offset>
 					</Anchor>
 				</Anchors>
 				
@@ -164,6 +158,84 @@
 						<AbsValue val="16" />
 					</TileSize>
 				</Backdrop>
+				
+				<Frames>
+					<ScrollFrame name="$parent_SF">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset> <AbsDimension x="5" y="-5" /> </Offset>
+							</Anchor>
+							
+							<Anchor point="BOTTOMRIGHT">
+								<Offset> <AbsDimension x="-5" y="5" /> </Offset>
+							</Anchor>
+						</Anchors>
+						
+						<Scripts>
+							<OnLoad>
+								SKA_PlayerList_Editor_ListFrame.scrollframe = self;
+							</OnLoad>
+							
+							<OnMouseWheel>
+								local slider = SKA_PlayerList_Editor_ListFrame_SF_Slider;
+								slider:SetValue(slider:GetValue()-(delta*10));
+							</OnMouseWheel>
+						</Scripts>
+						
+						<Frames>
+							<Slider name="$parent_Slider" inherits="UIPanelScrollBarTemplate">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="SKA_PlayerList_Editor_ListFrame" relativePoint="TOPRIGHT">
+										<Offset> <AbsDimension x="4" y="-16" /> </Offset>
+									</Anchor>
+									
+									<Anchor point="BOTTOMLEFT" relativeTo="SKA_PlayerList_Editor_ListFrame" relativePoint="BOTTOMRIGHT">
+										<Offset> <AbsDimension x="4" y="16" /> </Offset>
+									</Anchor>
+								</Anchors>
+								
+								<Scripts>
+									<OnLoad>
+										self:SetMinMaxValues(1, 1);
+										self:SetValueStep(1);
+										self.scrollStep = 1;
+										self:SetValue(0);
+										self:SetWidth(16);
+										SKA_PlayerList_Editor_ListFrame.scrollbar = self;
+										
+										function updateSlider(content)
+											if (content:GetHeight()-self:GetParent():GetHeight())>1 then
+												self:SetMinMaxValues(1, (content:GetHeight()-self:GetParent():GetHeight()));
+												self:Show();
+											else
+												self:Hide();
+											end
+										end
+									</OnLoad>
+									
+									<OnValueChanged>
+										self:GetParent():SetVerticalScroll(value);
+									</OnValueChanged>
+								</Scripts>
+							</Slider>
+							
+							<Frame name="$parent_Content">
+								<Size>
+									<AbsDimension x="128" y="2" />
+								</Size>
+								
+								<Scripts>
+									<OnLoad>
+										SKA_PlayerList_Editor_ListFrame_SF.content = self;
+										SKA_PlayerList_Editor_ListFrame_SF:SetScrollChild(self);
+									
+										self:SetWidth(self:GetParent():GetWidth());
+									</OnLoad>
+								</Scripts>
+							</Frame>
+						</Frames>
+					</ScrollFrame>
+				</Frames>
 			</Frame>
 		</Frames>
 	</Frame>

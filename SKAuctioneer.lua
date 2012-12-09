@@ -370,8 +370,8 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutgoing);
 SKA_PlayerList_Editor:SetFrameStrata("DIALOG");
 
 -- Populate SKA_PlayerList_Editor_ListFrame
-for i=1, #SKAuctioneer_PlayerList do
-	local frame = CreateFrame("Frame", SKA_PlayerList_Editor_ListFrame:GetName().."_ListItem"..i, SKA_PlayerList_Editor_ListFrame, "SKA_PlayerList_ListItemTemplate");
+for i=1, #SKAuctioneer_PlayerList*2 do
+	local frame = CreateFrame("Frame", SKA_PlayerList_Editor_ListFrame_SF.content:GetName().."_ListItem"..i, SKA_PlayerList_Editor_ListFrame_SF.content, "SKA_PlayerList_ListItemTemplate");
 	
 	if i==1 then
 		frame:SetPoint("TOP");
@@ -380,9 +380,17 @@ for i=1, #SKAuctioneer_PlayerList do
 	end
 	
 	local fString = frame:CreateFontString(frame:GetName().."_NameString", ARTWORK, "GameFontNormal");
-	fString:SetText(SKAuctioneer_PlayerList[i]);
+	fString:SetText(SKAuctioneer_PlayerList[floor(i/2)]);
 	fString:SetPoint("CENTER");
+	
+	SKA_PlayerList_Editor_ListFrame_SF.content:SetHeight(i*frame:GetHeight());
+	print(frame:GetHeight());
 end
+
+print(SKA_PlayerList_Editor_ListFrame_SF_Content:GetHeight());
+
+updateSlider(SKA_PlayerList_Editor_ListFrame_SF_Content);
+
 
 SKA_PlayerList_Editor:Show();
 
