@@ -389,9 +389,9 @@ end
 
 print(SKA_PlayerList_Editor_ListFrame_SF_Content:GetHeight());
 
-updateSlider(SKA_PlayerList_Editor_ListFrame_SF_Content);
+SKA_UpdateSlider(SKA_PlayerList_Editor_ListFrame_SF_Content);
 
-
+-- Just for testing purposes
 SKA_PlayerList_Editor:Show();
 
 

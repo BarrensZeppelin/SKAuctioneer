@@ -1,6 +1,8 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.blizzard.com/wow/ui ..\FrameXML\UI.xsd">
+	<!-- The Template that we will use for the entries in the PlayerList -->
+	
 	<Frame name="SKA_PlayerList_ListItemTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="0" y="20" />
@@ -8,7 +10,7 @@
 		
 		<Anchors>
 			<Anchor point="LEFT" />
-			
+			<!-- Makes the entries span from Left to Right (fills out the entire parent) -->
 			<Anchor point="RIGHT" />
 		</Anchors>
 		
@@ -21,11 +23,12 @@
 				</Anchors>
 				
 				<Scripts>
-					<OnLoad>
+					<OnLoad>	<!-- I'm using scale since you can't set a custom size -->
 						self:SetScale(0.8, 0.8);
 					</OnLoad>
 					
 					<OnClick>
+						<!-- DELETE PLAYER FROM LIST -->
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -39,6 +42,7 @@
 			</Button>
 		</Frames>
 	</Frame>
+	<!--	__________________________________________________________________________	-->
 	
 	<Frame name="SKA_PlayerList_Editor" parent="UIParent" hidden="true"
 		enableMouse="true" movable="true" clampedToScreen="true">
@@ -87,7 +91,7 @@
 		
 		<!-- Actual content of the Frame -->
 		
-		<Layers>
+		<Layers> <!-- The Layers element is just for the top Title and Artwork -->
 			<Layer level="ARTWORK">
 				<Texture name="$parentTitle" file="Interface\DialogFrame\UI-DialogBox-Header">
 					<Size>
@@ -116,20 +120,7 @@
 		</Layers>
 		
 		<Frames>
-			<!--<EditBox name="$parentEditBox" inherits="InputBoxTemplate">
-				<Anchors>
-					<Anchor point="CENTER">
-						<Offset>
-							<AbsDimension x="0" y="0" />
-						</Offset>
-					</Anchor>
-				</Anchors>
-				
-				<Size>
-					<AbsDimension x="200" y="100" />
-				</Size>
-			</EditBox> -->
-			
+			<!-- Standard button to close the frame -->
 			<Button name="$parent_CloseButton" inherits="UIPanelCloseButton">
 				<Anchors>
 					<Anchor point="TOPRIGHT">
@@ -138,6 +129,7 @@
 				</Anchors>
 			</Button>
 			
+			<!-- I use this Frame to give the ScrollFrame a nice border -->
 			<Frame name="$parent_ListFrame">
 				<Size>
 					<AbsDimension x="270" y="225" />
@@ -159,7 +151,12 @@
 					</TileSize>
 				</Backdrop>
 				
+				
 				<Frames>
+					<!-- The ScrollFrame takes care of Showing the right part of Content when the slider moves
+						This piece is basically just a translation from Lua to XML from this thread: 
+																http://us.battle.net/wow/en/forum/topic/1305771013
+					-->
 					<ScrollFrame name="$parent_SF">
 						<Anchors>
 							<Anchor point="TOPLEFT">
@@ -176,7 +173,8 @@
 								SKA_PlayerList_Editor_ListFrame.scrollframe = self;
 							</OnLoad>
 							
-							<OnMouseWheel>
+							<OnMouseWheel> <!-- function(self, delta) -->
+								<!-- This script lets you use the mousewheel for scrolling instead of dragging the slider -->
 								local slider = SKA_PlayerList_Editor_ListFrame_SF_Slider;
 								slider:SetValue(slider:GetValue()-(delta*10));
 							</OnMouseWheel>
@@ -203,7 +201,8 @@
 										self:SetWidth(16);
 										SKA_PlayerList_Editor_ListFrame.scrollbar = self;
 										
-										function updateSlider(content)
+										<!-- This function shows the Slider if the content's Height is larger than the SF Height -->
+										function SKA_UpdateSlider(content)
 											if (content:GetHeight()-self:GetParent():GetHeight())>1 then
 												self:SetMinMaxValues(1, (content:GetHeight()-self:GetParent():GetHeight()));
 												self:Show();
@@ -213,23 +212,20 @@
 										end
 									</OnLoad>
 									
-									<OnValueChanged>
+									<OnValueChanged> <!-- If the slider gets touched, notify the ScrollFrame -->
 										self:GetParent():SetVerticalScroll(value);
 									</OnValueChanged>
 								</Scripts>
 							</Slider>
 							
 							<Frame name="$parent_Content">
-								<Size>
-									<AbsDimension x="128" y="2" />
-								</Size>
-								
 								<Scripts>
 									<OnLoad>
 										SKA_PlayerList_Editor_ListFrame_SF.content = self;
 										SKA_PlayerList_Editor_ListFrame_SF:SetScrollChild(self);
 									
 										self:SetWidth(self:GetParent():GetWidth());
+										self:SetHeight(0);
 									</OnLoad>
 								</Scripts>
 							</Frame>
