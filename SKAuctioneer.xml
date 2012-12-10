@@ -4,16 +4,6 @@
 	
 	<!-- The Template that we will use for the entries in the PlayerList -->
 	<Frame name="SKA_PlayerList_ListItemTemplate" virtual="true">
-		<Size>
-			<AbsDimension x="0" y="20" />
-		</Size>
-		
-		<Anchors>
-			<Anchor point="LEFT" />
-			<!-- Makes the entries span from Left to Right (fills out the entire parent) -->
-			<Anchor point="RIGHT" />
-		</Anchors>
-		
 		<Frames>
 			<Button name="$parent_DelButton" inherits="UIPanelCloseButton">
 				<Anchors>
@@ -29,6 +19,7 @@
 					
 					<OnClick>
 						<!-- DELETE PLAYER FROM LIST -->
+						SKA_RemovePlayer(self:GetParent());
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -218,14 +209,16 @@
 								</Scripts>
 							</Slider>
 							
-							<Frame name="$parent_Content">
+							<Frame name="$parent_Content">		
 								<Scripts>
 									<OnLoad>
 										SKA_PlayerList_Editor_ListFrame_SF.content = self;
 										SKA_PlayerList_Editor_ListFrame_SF:SetScrollChild(self);
-									
+										
+										self:ClearAllPoints();
+										self:SetPoint("TOP");
 										self:SetWidth(self:GetParent():GetWidth());
-										self:SetHeight(0);
+										self:SetHeight(1);
 									</OnLoad>
 								</Scripts>
 							</Frame>
