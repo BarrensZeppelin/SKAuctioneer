@@ -380,7 +380,7 @@ for i=1, #SKAuctioneer_PlayerList*2 do
 	end
 	
 	local fString = frame:CreateFontString(frame:GetName().."_NameString", ARTWORK, "GameFontNormal");
-	fString:SetText(SKAuctioneer_PlayerList[floor(i/2)]);
+	fString:SetText(SKAuctioneer_PlayerList[floor((i/2)+0.5)]);
 	fString:SetPoint("CENTER");
 	
 	SKA_PlayerList_Editor_ListFrame_SF.content:SetHeight(i*frame:GetHeight());
