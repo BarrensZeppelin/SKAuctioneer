@@ -384,14 +384,16 @@ local function newListItem()
 	if not f then
 		f = CreateFrame("Frame", nil, SKA_PlayerList_Editor_ListFrame_SF.content, "SKA_PlayerList_ListItemTemplate");
 		f:SetPoint("LEFT"); f:SetPoint("RIGHT");
-		f:SetHeight(20);
+		f:SetHeight(25);
 		
 		local fString = f:CreateFontString("NameString", ARTWORK, "GameFontNormal");
-		fString:SetPoint("CENTER");
+		fString:SetPoint("LEFT", 70, 0);
 		
 		fString = f:CreateFontString("OrderString", ARTWORK, "GameFontNormal");
 		fString:SetPoint("LEFT", 5, 0);
 	else
+		local _, b1, b2 = f:GetChildren();
+		b1:Show(); b2:Show();
 		f:Show();
 	end
 	
@@ -402,33 +404,41 @@ end
 
 -- Populate SKA_PlayerList_Editor_ListFrame
 function SKA_BuildSF()
+	-- Clean up current content
 	local children = { SKA_PlayerList_Editor_ListFrame_SF_Content:GetChildren() };
 	for i=1, #children do
 		removeListItem(children[i]);
 	end
-
+	----------------------------
+	
+	
+	-- Add new content ------------
 	local height = 0;
 	
 	for i=1, #SKAuctioneer_PlayerList do
 		local frame = newListItem();
-		--print(frame:GetParent():GetName());
 		frame:SetPoint("TOP", frame:GetParent(), "TOP", 0, -((i-1)*frame:GetHeight()));
 		
-		local regions = { frame:GetRegions() };
-		
-		for u=1, #regions do
-			local fString = regions[u];
-			
-			if fString:GetName() == "NameString" then
-				fString:SetText(SKAuctioneer_PlayerList[i]);
-			elseif fString:GetName() == "OrderString" then
-				fString:SetText(i..".");
-			end
+		if i == 1 then
+			local _, ButtonUp = frame:GetChildren();
+			ButtonUp:Hide();
+		elseif i == #SKAuctioneer_PlayerList then
+			local _, _, ButtonDown = frame:GetChildren();
+			ButtonDown:Hide();
 		end
+		
+
+		local NameString, OrderString = frame:GetRegions();
+		
+		NameString:SetText(SKAuctioneer_PlayerList[i]);
+		OrderString:SetText(i..".");
+	
 		
 		height = height + frame:GetHeight();
 	end
+	-------------------------------
 	
+	-- Update elements
 	SKA_PlayerList_Editor_ListFrame_SF.content:SetHeight(height);
 	SKA_UpdateSlider(SKA_PlayerList_Editor_ListFrame_SF_Content);
 end
@@ -456,6 +466,33 @@ function SKA_RemovePlayer(frame)
 			break;
 		end
 	end
+	
+	SKA_BuildSF();
+end
+
+
+function SKA_PlayerUp(frame)
+	local NameString, OrderString = frame:GetRegions();
+	local pos = tonumber(string.match(OrderString:GetText(), "^(.+)\.$"));
+	
+	local name = NameString:GetText();
+	
+	-- Switch positions
+	SKAuctioneer_PlayerList[pos] = SKAuctioneer_PlayerList[pos-1];
+	SKAuctioneer_PlayerList[pos-1] = name;
+	
+	SKA_BuildSF();
+end
+
+function SKA_PlayerDown(frame)
+	local NameString, OrderString = frame:GetRegions();
+	local pos = tonumber(string.match(OrderString:GetText(), "^(.+)\.$"));
+	
+	local name = NameString:GetText();
+	
+	-- Switch positions
+	SKAuctioneer_PlayerList[pos] = SKAuctioneer_PlayerList[pos+1];
+	SKAuctioneer_PlayerList[pos+1] = name;
 	
 	SKA_BuildSF();
 end

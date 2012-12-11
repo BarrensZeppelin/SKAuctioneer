@@ -5,7 +5,7 @@
 	<!-- The Template that we will use for the entries in the PlayerList -->
 	<Frame name="SKA_PlayerList_ListItemTemplate" virtual="true">
 		<Frames>
-			<Button name="$parent_DelButton" inherits="UIPanelCloseButton">
+			<Button name="DelButton" inherits="UIPanelCloseButton">
 				<Anchors>
 					<Anchor point="RIGHT">
 						<Offset> <AbsDimension x="-5" y="0" /> </Offset>
@@ -24,12 +24,40 @@
 				</Scripts>
 			</Button>
 			
-			<Button name="$parent_DownButton" inherits="UIPanelScrollDownButtonTemplate">
+			<Button name="UpButton" inherits="SKA_Button_PlayerUp">
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parent_DelButon" relativePoint="LEFT">
-						<Offset> <AbsDimension x="-2" y="0" /> </Offset> 
+					<Anchor point="RIGHT" >
+						<Offset> <AbsDimension x="-60" y="0" /> </Offset> 
 					</Anchor>
 				</Anchors>
+				
+				<Scripts>
+					<OnLoad>
+						self:SetScale(0.8, 0.8);
+					</OnLoad>
+					
+					<OnClick>
+						SKA_PlayerUp(self:GetParent());
+					</OnClick>
+				</Scripts>
+			</Button>
+			
+			<Button name="DownButton" inherits="SKA_Button_PlayerDown">
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="RIGHT" >
+						<Offset> <AbsDimension x="-68" y="0" /> </Offset> 
+					</Anchor>
+				</Anchors>
+				
+				<Scripts>
+					<OnLoad>
+						self:SetScale(0.8, 0.8);
+					</OnLoad>
+					
+					<OnClick>
+						SKA_PlayerDown(self:GetParent());
+					</OnClick>
+				</Scripts>
 			</Button>
 		</Frames>
 	</Frame>
