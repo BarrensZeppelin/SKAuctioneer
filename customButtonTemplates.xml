@@ -1,0 +1,25 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.blizzard.com/wow/ui ..\FrameXML\UI.xsd">
+	
+	<Button name="SKA_Button_PlayerUp" virtual="true">
+		<Size>
+			<AbsDimension x="32" y="32"/>
+		</Size>
+
+		<NormalTexture urgency="5" file="Interface\AddOns\SKAuctioneer\buttons\Button_PlayerUp_Up"/>
+		<PushedTexture file="Interface\AddOns\SKAuctioneer\buttons\Button_PlayerUp_Down"/>
+		<HighlightTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
+	</Button>
+	
+	<Button name="SKA_Button_PlayerDown" virtual="true">
+		<Size>
+			<AbsDimension x="32" y="32"/>
+		</Size>
+
+		<NormalTexture urgency="5" file="Interface\AddOns\SKAuctioneer\buttons\Button_PlayerDown_Up"/>
+		<PushedTexture file="Interface\AddOns\SKAuctioneer\buttons\Button_PlayerDown_Down"/>
+		<HighlightTexture urgency="5" file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
+	</Button>
+	
+</Ui>
