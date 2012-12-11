@@ -396,7 +396,7 @@ local function newListItem()
 		b1:Show(); b2:Show();
 		f:Show();
 	end
-	
+
 	return f;
 end
 ---------------------------------------
