@@ -2,12 +2,13 @@
 local takers = {};
 local prefix = "[SKAuctioneer] ";
 
--- index 1 er højest på listen
+
 SKAuctioneer_PlayerList = {"Emanorp", "Fluffywrath", "Bazìnga", "Sartharia", "Dreamheal", "Xitsi", "Apoulsen", "Esaya", "Korzul", "Parium"}; -- Til at starte med hardcoder jeg playerlisten, bagefter vil der komme et GUI til at sætte den op
+
 --TEST: SKAuctioneer_PlayerList = {"Devmode", "Apoulsen"};
 SKAuctioneer_Channel = "GUILD";
 SKAuctioneer_AuctionTime = 15; -- seconds
-SKAuctioneer_ACL = {}; -- Access control list
+SKAuctioneer_ACL = {}; -- Access control list	
 SKAuctioneer_HideWhispers = true;
 
 local startAuction, endAuction, placeWant, cancelAuction, sendStatus, onEvent;
@@ -323,7 +324,7 @@ do
 				print(i..".".." "..SKAuctioneer_PlayerList[i]);
 			end
 			---------------------------------
-			
+			SKA_BuildSF();
 			SKA_PlayerList_Editor:Show();
 		elseif cmd == "hidechat" and tonumber(arg) then
 			if tonumber(arg) == 0 then 
@@ -369,30 +370,94 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutgoing);
 -- GUI STUFF BELOW:
 SKA_PlayerList_Editor:SetFrameStrata("DIALOG");
 
--- Populate SKA_PlayerList_Editor_ListFrame
-for i=1, #SKAuctioneer_PlayerList*2 do
-	local frame = CreateFrame("Frame", SKA_PlayerList_Editor_ListFrame_SF.content:GetName().."_ListItem"..i, SKA_PlayerList_Editor_ListFrame_SF.content, "SKA_PlayerList_ListItemTemplate");
-	
-	if i==1 then
-		frame:SetPoint("TOP");
-	else
-		frame:SetPoint("TOP", frame:GetParent():GetName().."_ListItem"..(i-1), "BOTTOM");
-	end
-	
-	local fString = frame:CreateFontString(frame:GetName().."_NameString", ARTWORK, "GameFontNormal");
-	fString:SetText(SKAuctioneer_PlayerList[floor((i/2)+0.5)]);
-	fString:SetPoint("CENTER");
-	
-	SKA_PlayerList_Editor_ListFrame_SF.content:SetHeight(i*frame:GetHeight());
-	print(frame:GetHeight());
+-- Table to reuse frames
+local ListItemPool = {};
+
+local function removeListItem(f)
+	f:Hide();
+	table.insert(ListItemPool, f);
 end
 
-print(SKA_PlayerList_Editor_ListFrame_SF_Content:GetHeight());
+local function newListItem()
+	local f = table.remove(ListItemPool);
+	
+	if not f then
+		f = CreateFrame("Frame", nil, SKA_PlayerList_Editor_ListFrame_SF.content, "SKA_PlayerList_ListItemTemplate");
+		f:SetPoint("LEFT"); f:SetPoint("RIGHT");
+		f:SetHeight(20);
+		
+		local fString = f:CreateFontString("NameString", ARTWORK, "GameFontNormal");
+		fString:SetPoint("CENTER");
+		
+		fString = f:CreateFontString("OrderString", ARTWORK, "GameFontNormal");
+		fString:SetPoint("LEFT", 5, 0);
+	else
+		f:Show();
+	end
 
-SKA_UpdateSlider(SKA_PlayerList_Editor_ListFrame_SF_Content);
+	return f;
+end
+---------------------------------------
 
--- Just for testing purposes
-SKA_PlayerList_Editor:Show();
 
+-- Populate SKA_PlayerList_Editor_ListFrame
+function SKA_BuildSF()
+	local children = { SKA_PlayerList_Editor_ListFrame_SF_Content:GetChildren() };
+	for i=1, #children do
+		removeListItem(children[i]);
+	end
+
+	local height = 0;
+	
+	for i=1, #SKAuctioneer_PlayerList do
+		local frame = newListItem();
+		--print(frame:GetParent():GetName());
+		frame:SetPoint("TOP", frame:GetParent(), "TOP", 0, -((i-1)*frame:GetHeight()));
+		
+		local regions = { frame:GetRegions() };
+		
+		for u=1, #regions do
+			local fString = regions[u];
+			
+			if fString:GetName() == "NameString" then
+				fString:SetText(SKAuctioneer_PlayerList[i]);
+			elseif fString:GetName() == "OrderString" then
+				fString:SetText(i..".");
+			end
+		end
+		
+		height = height + frame:GetHeight();
+	end
+	
+	SKA_PlayerList_Editor_ListFrame_SF.content:SetHeight(height);
+	SKA_UpdateSlider(SKA_PlayerList_Editor_ListFrame_SF_Content);
+end
+
+
+
+function SKA_RemovePlayer(frame)
+	local name = "";
+	
+	local regions = { frame:GetRegions() };
+	for u=1, #regions do
+		local fString = regions[u];
+		
+		if fString:GetName() == "NameString" then
+			name = fString:GetText();
+			break;
+		end
+	end
+	
+	removeListItem(frame);
+	
+	for i=1, #SKAuctioneer_PlayerList do
+		if name == SKAuctioneer_PlayerList[i] then
+			table.remove(SKAuctioneer_PlayerList, i);
+			break;
+		end
+	end
+	
+	SKA_BuildSF();
+end
 
 print("Loaded |cFF42E80CSKAuctioneer|r by |cFF90E80CAbsolute Zero / Al'Akir(EU)|r");
