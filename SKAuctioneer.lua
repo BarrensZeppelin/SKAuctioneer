@@ -370,6 +370,41 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutgoing);
 -- GUI STUFF BELOW:
 SKA_PlayerList_Editor:SetFrameStrata("DIALOG");
 
+
+-- Add Player popup
+StaticPopupDialogs["SKA_ADD_PLAYER"] = {
+	text = "Type the name of the player you want to add:",
+	button1 = ACCEPT,
+	button2 = CANCEL,
+	hasEditBox = 1,
+	maxLetters = 12,
+	OnAccept = function(self)
+		SKA_AddPlayer(self.editBox:GetText());
+	end,
+	OnShow = function(self)
+		self.editBox:SetFocus();
+	end,
+	OnHide = function(self)
+		self.editBox:SetText("");
+	end,
+	EditBoxOnEnterPressed = function(self)
+		SKA_AddPlayer(self:GetText());
+		self:GetParent():Hide();
+	end,
+	EditBoxOnEscapePressed = function(self)
+		self:GetParent():Hide();
+	end,
+	timeout = 0,
+	whileDead = 1,
+	hideOnEscape = 1
+};
+
+function SKA_ShowAddPlayerPopup()
+	StaticPopup_Show("SKA_ADD_PLAYER");
+end
+
+
+
 -- Table to reuse frames
 local ListItemPool = {};
 
@@ -445,20 +480,17 @@ end
 
 
 
-function SKA_RemovePlayer(frame)
-	local name = "";
+function SKA_AddPlayer(name)
+	table.insert(SKAuctioneer_PlayerList, name);
 	
-	local regions = { frame:GetRegions() };
-	for u=1, #regions do
-		local fString = regions[u];
-		
-		if fString:GetName() == "NameString" then
-			name = fString:GetText();
-			break;
-		end
-	end
+	SKA_BuildSF();
+end
+
+
+function SKA_RemovePlayer(frame)	
+	local NameString = frame:GetRegions();
+	local name = NameString:GetText();
 	
-	removeListItem(frame);
 	
 	for i=1, #SKAuctioneer_PlayerList do
 		if name == SKAuctioneer_PlayerList[i] then
@@ -471,30 +503,20 @@ function SKA_RemovePlayer(frame)
 end
 
 
-function SKA_PlayerUp(frame)
+function SKA_SwitchPlayer(frame, switchpos)
 	local NameString, OrderString = frame:GetRegions();
 	local pos = tonumber(string.match(OrderString:GetText(), "^(.+)\.$"));
+	
+	if pos+switchpos <= 0 or pos+switchpos > #SKAuctioneer_PlayerList then return; end
 	
 	local name = NameString:GetText();
 	
 	-- Switch positions
-	SKAuctioneer_PlayerList[pos] = SKAuctioneer_PlayerList[pos-1];
-	SKAuctioneer_PlayerList[pos-1] = name;
+	SKAuctioneer_PlayerList[pos] = SKAuctioneer_PlayerList[pos+switchpos];
+	SKAuctioneer_PlayerList[pos+switchpos] = name;
 	
 	SKA_BuildSF();
 end
 
-function SKA_PlayerDown(frame)
-	local NameString, OrderString = frame:GetRegions();
-	local pos = tonumber(string.match(OrderString:GetText(), "^(.+)\.$"));
-	
-	local name = NameString:GetText();
-	
-	-- Switch positions
-	SKAuctioneer_PlayerList[pos] = SKAuctioneer_PlayerList[pos+1];
-	SKAuctioneer_PlayerList[pos+1] = name;
-	
-	SKA_BuildSF();
-end
 
 print("Loaded |cFF42E80CSKAuctioneer|r by |cFF90E80CAbsolute Zero / Al'Akir(EU)|r");

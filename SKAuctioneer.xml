@@ -37,7 +37,7 @@
 					</OnLoad>
 					
 					<OnClick>
-						SKA_PlayerUp(self:GetParent());
+						SKA_SwitchPlayer(self:GetParent(), -1);
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -55,7 +55,7 @@
 					</OnLoad>
 					
 					<OnClick>
-						SKA_PlayerDown(self:GetParent());
+						SKA_SwitchPlayer(self:GetParent(), 1);
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -81,7 +81,7 @@
 		</Scripts>
 		
 		<Size>
-			<AbsDimension x="320" y="350" />
+			<AbsDimension x="320" y="310" />
 		</Size>
 		
 		<Anchors>
@@ -254,6 +254,41 @@
 					</ScrollFrame>
 				</Frames>
 			</Frame>
+			
+			<!-- The button to add players -->
+			<Button name="$parent_AddPlayerButton" text="Add Player!" inherits="UIPanelButtonTemplate">
+				<Size> <AbsDimension x="130" y="25" /> </Size>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT">
+						<Offset> <AbsDimension x="15" y="15" /> </Offset>
+					</Anchor>
+				</Anchors>
+				
+				<NormalFont style="GameFontNormal" />
+				
+				<Scripts>
+					<OnClick>
+						SKA_ShowAddPlayerPopup();
+					</OnClick>
+				</Scripts>
+			</Button>
+			
+			<Button name="$parent_CancelButton" text="Cancel" inherits="UIPanelButtonTemplate">
+				<Size> <AbsDimension x="130" y="25" /> </Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset> <AbsDimension x="-15" y="15" /> </Offset>
+					</Anchor>
+				</Anchors>
+				
+				<NormalFont style="GameFontNormal" />
+				
+				<Scripts>
+					<OnClick>
+						self:GetParent():Hide();
+					</OnClick>
+				</Scripts>
+			</Button>
 		</Frames>
 	</Frame>
 </Ui>
