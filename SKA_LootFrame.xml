@@ -1,0 +1,60 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.blizzard.com/wow/ui ..\FrameXML\UI.xsd">
+	<Frame name="SKA_LootFrame" parent="LootFrame">
+		<Size>
+			<AbsDimension x="250" y="100" />
+		</Size>
+		
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="LootFrame" relativePoint="TOPRIGHT">
+				<Offset>
+					<AbsDimension x="20" y="0" />
+				</Offset>
+			</Anchor>
+		</Anchors>
+	
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true"
+			edgeFile="Interface\DialogFrame\UI-DialogBox-Border">
+			<TileSize>
+				<AbsValue val="32" />
+			</TileSize>
+			
+			<EdgeSize>
+				<AbsValue val="32" />
+			</EdgeSize>
+			
+			<BackgroundInsets>
+				<AbsInset left="11" right="12" top="12" bottom="11" />
+			</BackgroundInsets>
+		</Backdrop>
+		
+		<Layers> <!-- The Layers element is just for the top Title and Artwork -->
+			<Layer level="ARTWORK">
+				<Texture name="$parentTitle" file="Interface\DialogFrame\UI-DialogBox-Header">
+					<Size>
+						<AbsDimension x="375" y="64" />
+					</Size>
+					
+					<Anchors>
+						<Anchor point="TOP">
+							<Offset>
+								<AbsDimension x="0" y="12" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				
+				<FontString inherits="GameFontNormal" text="[SKA] Loot Distribution:">
+					<Anchors>
+						<Anchor point="TOP" relativeTo="$parentTitle">
+							<Offset>
+								<AbsDimension x="0" y="-14" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Frame>
+</Ui>

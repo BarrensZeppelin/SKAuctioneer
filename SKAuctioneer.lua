@@ -1,7 +1,9 @@
-﻿local currentItem;
+﻿local testMode = true;
+
+local currentItem;
 local takers = {};
 local prefix = "[SKAuctioneer] ";
-
+local lootFrame_DroppedItems = {};
 
 SKAuctioneer_PlayerList = {"Emanorp", "Fluffywrath", "Bazìnga", "Sartharia", "Dreamheal", "Xitsi", "Apoulsen", "Esaya", "Korzul", "Parium"}; -- Til at starte med hardcoder jeg playerlisten, bagefter vil der komme et GUI til at sætte den op
 
@@ -361,13 +363,31 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutgoing);
 
 --[[ Todo:
 	- Frame beside lootwindow to start auctions
-	- GUI PlayerList editor : In process!
 	- Add all settings to a table (SKA_Settings) and parse that as the only SavedVariable
 	END]]
 	
 
 	
 -- GUI STUFF BELOW:
+local function lootFrame_OnEvent(self)
+	print("Opened loot. There are "..GetNumLootItems().." item(s) to loot.");
+	
+	for i=1, GetNumLootItems() do
+		local lootIcon, lootName, lootQuantity, rarity, locked = GetLootSlotInfo(i);
+		
+		if locked ~= 1 and rarity >= GetLootTreshold() then
+			table.insert(lootFrame_DroppedItems, {name = lootName});
+		end
+	end
+	
+	-- TODO: add lootGrame_DroppedItems to SKA_LootFrame as buttons
+end
+
+local lootFrame = CreateFrame("Frame", "SKA_LootFrame");
+lootFrame:RegisterEvent("LOOT_OPENED");
+lootFrame:SetScript("OnEvent", lootFrame_OnEvent);
+lootFrame:HookScript("OnHide", function(self) for k,v in pairs(lootFrame_DroppedItems) do lootFrame_DroppedItems[k]=nil; end end);
+
 SKA_PlayerList_Editor:SetFrameStrata("DIALOG");
 
 
