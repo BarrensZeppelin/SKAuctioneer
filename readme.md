@@ -1,6 +1,6 @@
 SKAuctioneer 
 ============
-created by Oskar Veileborg (Esaya) and Anders Poulsen (Apoulsen) for the guild Absolute Zero on Al'Akir EU (H).
+created by Oskar Veileborg (Esaya) for the guild Absolute Zero on Al'Akir EU (H).
 
 AddOn is created around the Suicide Kings(SK) loot distribution system.    
 Information about SK loot system can be found here: http://www.wowwiki.com/Suicide_Kings.
