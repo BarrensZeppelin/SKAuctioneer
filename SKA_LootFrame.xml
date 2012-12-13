@@ -2,15 +2,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.blizzard.com/wow/ui ..\FrameXML\UI.xsd">
 	<Frame name="SKA_LootFrame" parent="LootFrame">
-		<Size>
-			<AbsDimension x="250" y="100" />
-		</Size>
+		<Size> <AbsDimension x="250" y="100" /> </Size>
 		
 		<Anchors>
 			<Anchor point="TOPLEFT" relativeTo="LootFrame" relativePoint="TOPRIGHT">
-				<Offset>
-					<AbsDimension x="20" y="0" />
-				</Offset>
+				<Offset> <AbsDimension x="20" y="0" /> </Offset>
 			</Anchor>
 		</Anchors>
 	

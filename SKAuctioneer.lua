@@ -370,23 +370,33 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutgoing);
 	
 -- GUI STUFF BELOW:
 local function lootFrame_OnEvent(self)
-	print("Opened loot. There are "..GetNumLootItems().." item(s) to loot.");
+	local lootmethod, pID = GetLootMethod();
+	local lootTreshold;
+	if IsInRaid() then lootTreshold = GetLootTreshold(); else lootTreshold = 0; end
 	
-	for i=1, GetNumLootItems() do
-		local lootIcon, lootName, lootQuantity, rarity, locked = GetLootSlotInfo(i);
+	if (lootmethod == "master" and pID == 0) or testMode then
+		print("Opened loot. There are "..GetNumLootItems().." item(s) to loot.");
 		
-		if locked ~= 1 and rarity >= GetLootTreshold() then
-			table.insert(lootFrame_DroppedItems, {name = lootName});
+		for i=1, GetNumLootItems() do
+			local lootIcon, lootName, lootQuantity, rarity, locked = GetLootSlotInfo(i);
+			
+			if locked ~= 1 and rarity >= lootTreshold then
+				table.insert(lootFrame_DroppedItems, {name = lootName, link = GetLootSlotLink(i)});
+			end
+		end
+		
+		-- TODO: add lootFrame_DroppedItems to SKA_LootFrame as buttons
+		if #lootFrame_DroppedItems>0 then
+			local frame = CreateFrame("Button", "LootButton", "SKA_LootFrame", "LootButtonTemplate");
+			
 		end
 	end
-	
-	-- TODO: add lootGrame_DroppedItems to SKA_LootFrame as buttons
 end
 
 local lootFrame = CreateFrame("Frame", "SKA_LootFrame");
 lootFrame:RegisterEvent("LOOT_OPENED");
 lootFrame:SetScript("OnEvent", lootFrame_OnEvent);
-lootFrame:HookScript("OnHide", function(self) for k,v in pairs(lootFrame_DroppedItems) do lootFrame_DroppedItems[k]=nil; end end);
+lootFrame:HookScript("OnHide", function(self) for k,v in pairs(lootFrame_DroppedItems) do lootFrame_DroppedItems[k]=nil; end end); -- Clear the table when lootFrame hides
 
 SKA_PlayerList_Editor:SetFrameStrata("DIALOG");
 
