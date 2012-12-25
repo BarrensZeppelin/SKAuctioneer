@@ -3,7 +3,7 @@
 local currentItem;
 local takers = {};
 local prefix = "[SKAuctioneer] ";
-local lootFrame_DroppedItems = {};
+--local lootFrame_DroppedItems = {};
 
 SKAuctioneer_PlayerList = {"Emanorp", "Fluffywrath", "Bazìnga", "Sartharia", "Dreamheal", "Xitsi", "Apoulsen", "Esaya", "Korzul", "Parium"}; -- Til at starte med hardcoder jeg playerlisten, bagefter vil der komme et GUI til at sætte den op
 
@@ -362,41 +362,106 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutgoing);
 
 
 --[[ Todo:
-	- Frame beside lootwindow to start auctions
 	- Add all settings to a table (SKA_Settings) and parse that as the only SavedVariable
 	END]]
 	
 
-	
 -- GUI STUFF BELOW:
+
+-- Table to reuse Buttons
+local LootButtonPool = {};
+
+local function removeLootButton(f)
+	f:Hide();
+	table.insert(LootButtonPool, f);
+end
+
+local function newLootButton(iconTexture)
+	local f = table.remove(LootButtonPool);
+	
+	if not f then
+		f = CreateFrame("Button", nil, SKA_LootFrame, "LootButtonTemplate");
+		local regions = { f:GetRegions() };
+		for i=1, #regions do
+			--print(regions[i]:GetName());
+			if regions[i]:GetName() == "SKA_LootFrameNameFrame" then
+				regions[i]:Hide();
+			elseif regions[i]:GetName() == "SKA_LootFrameIconTexture" then
+				regions[i]:SetTexture(iconTexture);
+			end
+		end
+	else
+		local regions = { f:GetRegions() };
+		for i=1, #regions do
+			--print(regions[i]:GetName());
+			if regions[i]:GetName() == "SKA_LootFrameIconTexture" then
+				regions[i]:SetTexture(iconTexture);
+			end
+		end
+		f:Show();
+	end
+
+	return f;
+end
+
 local function lootFrame_OnEvent(self)
+	local children = { self:GetChildren() };
+	for i=1, #children do
+		removeLootButton(children[i]);
+	end
+	
+
 	local lootmethod, pID = GetLootMethod();
 	local lootTreshold;
 	if IsInRaid() then lootTreshold = GetLootTreshold(); else lootTreshold = 0; end
 	
 	if (lootmethod == "master" and pID == 0) or testMode then
-		print("Opened loot. There are "..GetNumLootItems().." item(s) to loot.");
+		--print("Opened loot. There are "..GetNumLootItems().." item(s) to loot.");
+		
+		local validItems = 0;
 		
 		for i=1, GetNumLootItems() do
 			local lootIcon, lootName, lootQuantity, rarity, locked = GetLootSlotInfo(i);
+			local index = 0;
 			
-			if locked ~= 1 and rarity >= lootTreshold then
-				table.insert(lootFrame_DroppedItems, {name = lootName, link = GetLootSlotLink(i)});
+			if locked ~= 1 and rarity >= lootTreshold and GetLootSlotType(i) == LOOT_SLOT_ITEM then
+				--table.insert(lootFrame_DroppedItems, {name = lootName, link = GetLootSlotLink(i)});
+				local button = newLootButton(lootIcon);
+				
+				--Grid positioning
+				button:SetPoint("TOPLEFT", "SKA_LootFrame", "TOPLEFT", 20+((i-1)%4)*42, -35+(floor((i-1)/4))*(-42));
+				
+				button:SetScript("OnClick", function(self) 
+					startAuction(GetLootSlotLink(i));
+					removeLootButton(self);
+				end);
+				
+				
+				button:SetScript("OnEnter", function(self)
+					GameTooltip:SetOwner(self, "ANCHOR_CURSOR");
+					GameTooltip:SetLootItem(i);
+					GameTooltip:AddLine("");
+					GameTooltip:AddLine("Start Auction!", 1, 0.5, 0);
+					GameTooltip:Show();
+				end);
+				
+				
+				index = index+1;
+				validItems = validItems + 1;
 			end
 		end
 		
-		-- TODO: add lootFrame_DroppedItems to SKA_LootFrame as buttons
-		if #lootFrame_DroppedItems>0 then
-			local frame = CreateFrame("Button", "LootButton", "SKA_LootFrame", "LootButtonTemplate");
-			
+		if validItems > 0 then
+			SKA_LootFrame:SetHeight(58+validItems*42);
+			SKA_LootFrame:Show();
 		end
 	end
 end
 
-local lootFrame = CreateFrame("Frame", "SKA_LootFrame");
+local lootFrame = CreateFrame("Frame", "SKA_LootFrame", LootFrame, "SKA_LootFrame_Template");
 lootFrame:RegisterEvent("LOOT_OPENED");
 lootFrame:SetScript("OnEvent", lootFrame_OnEvent);
-lootFrame:HookScript("OnHide", function(self) for k,v in pairs(lootFrame_DroppedItems) do lootFrame_DroppedItems[k]=nil; end end); -- Clear the table when lootFrame hides
+--lootFrame:SetScript("OnHide", function(self) for k,v in pairs(lootFrame_DroppedItems) do lootFrame_DroppedItems[k]=nil; end end); -- Clear the table when lootFrame hides
 
 SKA_PlayerList_Editor:SetFrameStrata("DIALOG");
 
@@ -485,8 +550,11 @@ function SKA_BuildSF()
 		frame:SetPoint("TOP", frame:GetParent(), "TOP", 0, -((i-1)*frame:GetHeight()));
 		
 		if i == 1 then
-			local _, ButtonUp = frame:GetChildren();
+			local _, ButtonUp, ButtonDown = frame:GetChildren();
 			ButtonUp:Hide();
+			if #SKAuctioneer_PlayerList == 1 then
+				ButtonDown:Hide();
+			end
 		elseif i == #SKAuctioneer_PlayerList then
 			local _, _, ButtonDown = frame:GetChildren();
 			ButtonDown:Hide();
