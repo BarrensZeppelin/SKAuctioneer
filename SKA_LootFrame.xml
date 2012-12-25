@@ -52,5 +52,15 @@
 				</FontString>
 			</Layer>
 		</Layers>
+		
+		<Frames>
+			<Button name="$parent_CloseButton" inherits="UIPanelCloseButton">
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset> <AbsDimension x="-5" y="-5" /> </Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+		</Frames>
 	</Frame>
 </Ui>
