@@ -12,6 +12,7 @@ SKAuctioneer_Channel = "GUILD";
 SKAuctioneer_AuctionTime = 15; -- seconds
 SKAuctioneer_ACL = {}; -- Access control list	
 SKAuctioneer_HideWhispers = true;
+SKAuctioneer_LDB = true;
 
 local startAuction, endAuction, placeWant, cancelAuction, sendStatus, onEvent;
 
@@ -273,8 +274,9 @@ do
 		table.insert(usage, " - acl - Returns the Access Control List.");
 		table.insert(usage, " - acl add <players> - Adds <players> separated by spaces to the ACL.");
 		table.insert(usage, " - acl remove <players> - Removes <players> from the ACL.");
-		table.insert(usage, " - playerlist - Lists the PlayerList in text-form.");
-		table.insert(usage, " - hidechat <0/1> - Hides incoming and outgoing whispers if true.");
+		table.insert(usage, " - playerlist - Shows the Player List editing frame.");
+		table.insert(usage, " - hidechat <Y/N> - Hide whispers by SKA?");
+		table.insert(usage, " - ldb <Y/N> - Use the SKA Loot Distribution Interface?");
 	
 	local function addToACL(...)
 		for i=1, select("#", ...) do
@@ -324,21 +326,23 @@ do
 				removeFromACL(select(3, string.split(" ", msg)));
 			end
 		elseif cmd == "playerlist" then
-			----- TEMPORARY SOLUTION
-			print("PlayerList:");
-			for i=1, #SKAuctioneer_PlayerList do
-				print(i..".".." "..SKAuctioneer_PlayerList[i]);
-			end
-			---------------------------------
 			SKA_BuildSF();
 			SKA_PlayerList_Editor:Show();
-		elseif cmd == "hidechat" and tonumber(arg) then
-			if tonumber(arg) == 0 then 
+		elseif cmd == "hidechat" and (tonumber(arg) or (arg:lower()=="y" or arg:lower()=="n")) then
+			if tonumber(arg) == 0 or arg:lower()=="n" then 
 				SKAuctioneer_HideWhispers = false;
 				print("SKA now shows chat created by auctions.");
-			else
+			elseif tonumber(arg) == 1 or arg:lower()=="y" then
 				SKAuctioneer_HideWhispers = true;
 				print("SKA no longer shows chat created by auctions.");
+			end
+		elseif cmd == "ldb" and (arg:lower()=="y" or arg:lower()=="n") then
+			if arg:lower()=="y" then
+				SKAuctioneer_LDB = true;
+				print("SKA will now show the distribution interface in raids.");
+			elseif arg:lower()=="n" then
+				SKAuctioneer_LDB = false;
+				print("SKA will no longer show the distribution interface.");
 			end
 		else
 			for i=1, #usage do
