@@ -61,6 +61,18 @@
 					</Anchor>
 				</Anchors>
 			</Button>
+			
+			<Frame name="$parent_ButtonFrame">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset> <AbsDimension x="20" y="-35" /> </Offset>
+					</Anchor>
+					
+					<Anchor point="BOTTOMRIGHT">
+						<Offset> <AbsDimension x="-20" y="0" /> </Offset>
+					</Anchor>
+				</Anchors>
+			</Frame>
 		</Frames>
 	</Frame>
 </Ui>

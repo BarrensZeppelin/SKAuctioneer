@@ -88,14 +88,18 @@ do
 			local msg = auctionAlreadyRunning:format(currentItem);
 			if starter then
 				SendChatMessage(msg, "WHISPER", nil, starter);
+				return false;
 			else
 				print(msg);
+				return false;
 			end
 		else
 			currentItem = item;
 			SendChatMessage(startingAuction:format(item, SKAuctioneer_AuctionTime), SKAuctioneer_Channel);
 			_Timer_Schedule(SKAuctioneer_AuctionTime/2, SendChatMessage, noBidsYet:format(item, SKAuctioneer_AuctionTime/2), SKAuctioneer_Channel);
 			_Timer_Schedule(SKAuctioneer_AuctionTime, endAuction);
+			
+			return true;
 		end
 	end
 end
@@ -380,13 +384,13 @@ local function newLootButton(iconTexture)
 	local f = table.remove(LootButtonPool);
 	
 	if not f then
-		f = CreateFrame("Button", nil, SKA_LootFrame, "LootButtonTemplate");
+		f = CreateFrame("Button", nil, SKA_LootFrame_ButtonFrame, "LootButtonTemplate");
 		local regions = { f:GetRegions() };
 		for i=1, #regions do
 			--print(regions[i]:GetName());
-			if regions[i]:GetName() == "SKA_LootFrameNameFrame" then
+			if regions[i]:GetName() == "SKA_LootFrame_ButtonFrameNameFrame" then
 				regions[i]:Hide();
-			elseif regions[i]:GetName() == "SKA_LootFrameIconTexture" then
+			elseif regions[i]:GetName() == "SKA_LootFrame_ButtonFrameIconTexture" then
 				regions[i]:SetTexture(iconTexture);
 			end
 		end
@@ -394,7 +398,7 @@ local function newLootButton(iconTexture)
 		local regions = { f:GetRegions() };
 		for i=1, #regions do
 			--print(regions[i]:GetName());
-			if regions[i]:GetName() == "SKA_LootFrameIconTexture" then
+			if regions[i]:GetName() == "SKA_LootFrame_ButtonFrameIconTexture" then
 				regions[i]:SetTexture(iconTexture);
 			end
 		end
@@ -405,7 +409,7 @@ local function newLootButton(iconTexture)
 end
 
 local function lootFrame_OnEvent(self)
-	local children = { self:GetChildren() };
+	local children = { _G["SKA_LootFrame_ButtonFrame"]:GetChildren() };
 	for i=1, #children do
 		removeLootButton(children[i]);
 	end
@@ -425,15 +429,15 @@ local function lootFrame_OnEvent(self)
 			local index = 0;
 			
 			if locked ~= 1 and rarity >= lootTreshold and GetLootSlotType(i) == LOOT_SLOT_ITEM then
-				--table.insert(lootFrame_DroppedItems, {name = lootName, link = GetLootSlotLink(i)});
 				local button = newLootButton(lootIcon);
 				
 				--Grid positioning
-				button:SetPoint("TOPLEFT", "SKA_LootFrame", "TOPLEFT", 20+((i-1)%4)*42, -35+(floor((i-1)/4))*(-42));
+				button:SetPoint("TOPLEFT", "SKA_LootFrame_ButtonFrame", "TOPLEFT", ((validItems)%5)*42, (floor((validItems)/5))*(-42));
 				
 				button:SetScript("OnClick", function(self) 
-					startAuction(GetLootSlotLink(i));
-					removeLootButton(self);
+					if startAuction(GetLootSlotLink(i)) then 
+						removeLootButton(self);
+					end
 				end);
 				
 				
@@ -452,7 +456,7 @@ local function lootFrame_OnEvent(self)
 		end
 		
 		if validItems > 0 then
-			SKA_LootFrame:SetHeight(58+validItems*42);
+			SKA_LootFrame:SetHeight(58+ceil(validItems/5)*42);
 			SKA_LootFrame:Show();
 		end
 	end
@@ -461,7 +465,6 @@ end
 local lootFrame = CreateFrame("Frame", "SKA_LootFrame", LootFrame, "SKA_LootFrame_Template");
 lootFrame:RegisterEvent("LOOT_OPENED");
 lootFrame:SetScript("OnEvent", lootFrame_OnEvent);
---lootFrame:SetScript("OnHide", function(self) for k,v in pairs(lootFrame_DroppedItems) do lootFrame_DroppedItems[k]=nil; end end); -- Clear the table when lootFrame hides
 
 SKA_PlayerList_Editor:SetFrameStrata("DIALOG");
 
