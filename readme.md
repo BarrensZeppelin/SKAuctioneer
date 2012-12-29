@@ -7,9 +7,10 @@ SKAuctioneer is a lightweight and 100% open-source AddOn for Suicide Kings(SK) l
    - Simple and solid item auctioning
    - Automatic player suicide
    - SK player list management interface
-   - Shared auction control (with the Access Control List)
+   - Ongoing auction status reports (no stealth auctions/no gambling)
+   - Shared AddOn control (with the Access Control List)
    - Modifiable output Channel and auction run-time 
-   - And an optional loot distribution interface!
+   - And a tailored loot distribution interface!
 
 Information about SK loot system can be found here: http://www.wowwiki.com/Suicide_Kings.
 
@@ -27,7 +28,8 @@ There are two ways of winning an item in this version of the SK ruleset:
 
 When an auction ends and at least one player has declared need on the auctioned item, SKAuctioneer will find the highest ranked player on the SK player list, name him the winner and suicide him to the bottom!
 
-If there are no needers, but at least one greeder, SKAuctioneer will ask the greeders to roll for the item, or automatically find a random winner from the pool, based on your preference. Note, that by winning an item by greed, the lucky player does not suicide to the bottom of the SK player list.
+If there are no needers, but at least one greeder, SKAuctioneer will ask the greeders to roll for the item, or automatically find a random winner from the pool, based on your preference.    
+**Note, that by winning an item by greed, the lucky player does not suicide to the bottom of the SK player list.**
 
 ### How-to:
 Quick-slash: `/ska`
@@ -49,8 +51,10 @@ Ongoing auctions can be cancelled by writing `/ska stop` or by a player on the A
 Refer to the guide in-game on how to perform other tasks such as setting the Channel which SKAuctioneer should use.
 
 #### For everyone else:
-Once an auction has started and the auctioned item is to your liking, do hesitate to whisper the SKAuctioneer host your status on the item.    
-Simply `/w [SKA Host] <need/greed>` and SKAuctioneer will automatically update your status or add you to the list of needers/greeders.
+Once an auction has started and the auctioned item is to your liking, do not hesitate to whisper the SKAuctioneer host your status on the item. Simply `/w [SKA Host] <need/greed>` and SKAuctioneer will automatically update your status or add you to the list of needers/greeders.    
+For instance: if I wanted the item, but not enough to let go of my SK position, I would type `/w Apoulsen greed` (In this example Apoulsen is the `[SKA Host]`)    
+If I were to change my mind and decide that I really wanted the item, I could just change to need by typing `/w Apoulsen need`.    
+**Keep in mind** that you can not change your status to greed after you have already needed!
 
 Now that you know how to control the SKAuctioneer AddOn, start using it!
 
