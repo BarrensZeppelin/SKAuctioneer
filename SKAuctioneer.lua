@@ -3,16 +3,23 @@
 local currentItem;
 local takers = {};
 local prefix = "[SKAuctioneer] ";
---local lootFrame_DroppedItems = {};
 
-SKAuctioneer_PlayerList = {"Emanorp", "Fluffywrath", "Bazìnga", "Sartharia", "Dreamheal", "Xitsi", "Apoulsen", "Esaya", "Korzul", "Parium"}; -- Til at starte med hardcoder jeg playerlisten, bagefter vil der komme et GUI til at sætte den op
 
---TEST: SKAuctioneer_PlayerList = {"Devmode", "Apoulsen"};
-SKAuctioneer_Channel = "GUILD";
-SKAuctioneer_AuctionTime = 15; -- seconds
-SKAuctioneer_ACL = {}; -- Access control list	
-SKAuctioneer_HideWhispers = true;
-SKAuctioneer_LDB = true;
+SKAuctioneer_Settings = {
+	PlayerList = {},
+
+	Channel = "GUILD",
+	
+	AuctionTime = 15,
+	
+	ACL = {}, -- Access control list
+	
+	HideWhispers = true,
+	
+	LDB = true,
+	
+	FirstRun = true
+};
 
 local startAuction, endAuction, placeWant, cancelAuction, sendStatus, onEvent;
 
@@ -63,17 +70,17 @@ do
 		greedString = greedString..".";
 		-------------------------
 		
-		if #needers > 0 then SendChatMessage(printNeedStatus:format(needString), SKAuctioneer_Channel); end
-		if #greeders > 0 then SendChatMessage(printGreedStatus:format(greedString), SKAuctioneer_Channel); end
+		if #needers > 0 then SendChatMessage(printNeedStatus:format(needString), SKAuctioneer_Settings.Channel); end
+		if #greeders > 0 then SendChatMessage(printGreedStatus:format(greedString), SKAuctioneer_Settings.Channel); end
 		_Timer_Unschedule(endAuction); 	_Timer_Schedule(10, endAuction); -- Reschedule endAuction to end in 10 seconds, so people have time to react
-		SendChatMessage(auctionProgress:format(currentItem, 10), SKAuctioneer_Channel);
+		SendChatMessage(auctionProgress:format(currentItem, 10), SKAuctioneer_Settings.Channel);
 	end
 end
 
 local function suicidePlayer(name)
-	for i=1, #SKAuctioneer_PlayerList do
-		if name == SKAuctioneer_PlayerList[i] then
-			table.insert(SKAuctioneer_PlayerList, table.remove(SKAuctioneer_PlayerList, i));
+	for i=1, #SKAuctioneer_Settings.PlayerList do
+		if name == SKAuctioneer_Settings.PlayerList[i] then
+			table.insert(SKAuctioneer_Settings.PlayerList, table.remove(SKAuctioneer_Settings.PlayerList, i));
 			break;
 		end
 	end
@@ -96,9 +103,9 @@ do
 			end
 		else
 			currentItem = item;
-			SendChatMessage(startingAuction:format(item, SKAuctioneer_AuctionTime), SKAuctioneer_Channel);
-			_Timer_Schedule(SKAuctioneer_AuctionTime/2, SendChatMessage, noBidsYet:format(item, SKAuctioneer_AuctionTime/2), SKAuctioneer_Channel);
-			_Timer_Schedule(SKAuctioneer_AuctionTime, endAuction);
+			SendChatMessage(startingAuction:format(item, SKAuctioneer_Settings.AuctionTime), SKAuctioneer_Settings.Channel);
+			_Timer_Schedule(SKAuctioneer_Settings.AuctionTime/2, SendChatMessage, noBidsYet:format(item, SKAuctioneer_Settings.AuctionTime/2), SKAuctioneer_Settings.Channel);
+			_Timer_Schedule(SKAuctioneer_Settings.AuctionTime, endAuction);
 			
 			return true;
 		end
@@ -116,7 +123,7 @@ do
 			_Timer_Unschedule(SendChatMessage);
 			_Timer_Unschedule(endAuction);
 			_Timer_Unschedule(sendStatus);
-			SendChatMessage(cancelled:format(sender or UnitName("player")), SKAuctioneer_Channel);
+			SendChatMessage(cancelled:format(sender or UnitName("player")), SKAuctioneer_Settings.Channel);
 		else
 			SendChatMessage(noAuction, "WHISPER", nil, sender);
 		end
@@ -130,12 +137,12 @@ do
 	
 	function endAuction()
 		if #takers == 0 then
-			SendChatMessage(noTakers:format(currentItem), SKAuctioneer_Channel);
+			SendChatMessage(noTakers:format(currentItem), SKAuctioneer_Settings.Channel);
 		elseif #takers == 1 then
 			if takers[1].status == "greed" then
-				SendChatMessage(greedWinner:format(takers[1].name, currentItem), SKAuctioneer_Channel);
+				SendChatMessage(greedWinner:format(takers[1].name, currentItem), SKAuctioneer_Settings.Channel);
 			else
-				SendChatMessage(needWinner:format(takers[1].name, currentItem), SKAuctioneer_Channel);
+				SendChatMessage(needWinner:format(takers[1].name, currentItem), SKAuctioneer_Settings.Channel);
 				suicidePlayer(takers[1].name);
 			end
 		else
@@ -148,10 +155,10 @@ do
 			
 			if #needers > 0 then -- dette stykke kode kører igennem listen fra 1 til maks og giver item til den første der optræder
 				local found = false;
-				for i=1, #SKAuctioneer_PlayerList do
+				for i=1, #SKAuctioneer_Settings.PlayerList do
 					for u=1, #needers do
-						if needers[u] == SKAuctioneer_PlayerList[i] then
-							SendChatMessage(needWinner:format(needers[u], currentItem), SKAuctioneer_Channel);
+						if needers[u] == SKAuctioneer_Settings.PlayerList[i] then
+							SendChatMessage(needWinner:format(needers[u], currentItem), SKAuctioneer_Settings.Channel);
 							found = true;
 							suicidePlayer(needers[u]);
 							break;
@@ -173,7 +180,7 @@ do
 					end
 				end
 				greedString = greedString.." - /roll  for "..currentItem.." now!";
-				SendChatMessage(greedString, SKAuctioneer_Channel);
+				SendChatMessage(greedString, SKAuctioneer_Settings.Channel);
 			end
 		end
 		
@@ -203,11 +210,8 @@ do
 			
 			for i=1, #takers do
 				if takers[i].name == sender then
-					if msg:lower() == "greed" and takers[i].status == "greed" then
-						SendChatMessage(alreadyBid:format(msg:lower(), currentItem), "WHISPER", nil, sender);
-						return;
-					elseif msg:lower() == "need" and takers[i].status == "need" then
-						SendChatMessage(alreadyBid:format(msg:lower(), currentItem), "WHISPER", nil, sender);
+					if (msg:lower() == "greed" and takers[i].status == "greed") or (msg:lower() == "need" and takers[i].status == "need") then
+						SendChatMessage(alreadyBid:format(takers[i].status, currentItem), "WHISPER", nil, sender);
 						return;
 					else
 						takers[i].status = msg:lower();
@@ -216,7 +220,7 @@ do
 						_Timer_Extend(3, endAuction);
 						_Timer_Unschedule(sendStatus);
 						_Timer_Schedule(2, sendStatus);
-						_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_AuctionTime/2), SKAuctioneer_Channel);
+						_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_Settings.AuctionTime/2), SKAuctioneer_Settings.Channel);
 						return;
 					end
 				end
@@ -229,9 +233,9 @@ do
 			_Timer_Extend(4, endAuction);
 			_Timer_Unschedule(sendStatus);
 			_Timer_Schedule(2, sendStatus);
-			_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_AuctionTime/2), SKAuctioneer_Channel);
+			_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_Settings.AuctionTime/2), SKAuctioneer_Settings.Channel);
 		
-		elseif SKAuctioneer_ACL[sender] then
+		elseif SKAuctioneer_Settings.ACL[sender] then
 			local cmd, arg = msg:match("^!(%w+)%s*(.*)");
 			if cmd and cmd:lower() == "auction" and arg then
 				startAuction(arg, sender);
@@ -250,6 +254,27 @@ frame:RegisterEvent("CHAT_MSG_OFFICER");
 frame:RegisterEvent("CHAT_MSG_GUILD");
 frame:RegisterEvent("CHAT_MSG_SAY");
 frame:SetScript("OnEvent", onEvent);
+
+local e = 0;
+local function onUpdate(self, elapsed)
+	if not SKAuctioneer_Settings.FirstRun then
+		frame:SetScript("OnUpdate", nil);
+	else
+		e = e + elapsed;
+		if e >= 2 then
+			print('This seems to be the first time you have run |cFF42E80CSKAuctioneer|r, please take some time to set up your playerlist.\nYou can always do this at another time by typing "/ska playerlist"!');
+			
+			
+			SKA_AddPlayer(UnitName("player"));
+			SKA_PlayerList_Editor:Show();
+			
+			SKAuctioneer_Settings.FirstRun = false;
+		end
+	end
+end
+
+frame:SetScript("OnUpdate", onUpdate);
+
 
 SLASH_SKAuctioneer1 = "/ska";
 SLASH_SKAuctioneer2 = "/skauc";
@@ -278,17 +303,18 @@ do
 		table.insert(usage, " - playerlist - Shows the Player List editing frame.");
 		table.insert(usage, " - hidechat <Y/N> - Hide whispers by SKA?");
 		table.insert(usage, " - ldb <Y/N> - Use the SKA Loot Distribution Interface?");
+		table.insert(usage, " - reset - Sets settings back to default.");
 	
 	local function addToACL(...)
 		for i=1, select("#", ...) do
-			SKAuctioneer_ACL[select(i, ...)] = true;
+			SKAuctioneer_Settings.ACL[select(i, ...)] = true;
 		end
 		print(addedToACL:format(select("#", ...)));
 	end
 	
 	local function removeFromACL(...)
 		for i=1, select("#", ...) do
-			SKAuctioneer_ACL[select(i, ...)] = nil;
+			SKAuctioneer_Settings.ACL[select(i, ...)] = nil;
 		end
 		print(removedFromACL:format(select("#", ...)));
 	end
@@ -300,51 +326,69 @@ do
 		if cmd == "start" and arg then
 			startAuction(msg:match("^start%s+(.+)")) -- extract the item link
 		elseif cmd == "stop" then
-			cancelAuction();
+			cancelAuction(UnitName("player"));
 		elseif cmd == "channel" then
 			if arg then
-				SKAuctioneer_Channel = arg:upper();
-				print(setChannel:format(SKAuctioneer_Channel));
+				SKAuctioneer_Settings.Channel = arg:upper();
+				print(setChannel:format(SKAuctioneer_Settings.Channel));
 			else
-				print(currChannel:format(SKAuctioneer_Channel));
+				print(currChannel:format(SKAuctioneer_Settings.Channel));
 			end
 		elseif cmd == "time" then
 			if arg and tonumber(arg) then
-				SKAuctioneer_AuctionTime = tonumber(arg);
-				print(setTime:format(SKAuctioneer_AuctionTime));
+				SKAuctioneer_Settings.AuctionTime = tonumber(arg);
+				print(setTime:format(SKAuctioneer_Settings.AuctionTime));
 			else
-				print(currTime:format(SKAuctioneer_AuctionTime));
+				print(currTime:format(SKAuctioneer_Settings.AuctionTime));
 			end
 		elseif cmd == "acl" then
 			if not arg then
 				print(ACL);
-				for k, v in pairs(SKAuctioneer_ACL) do
+				for k, v in pairs(SKAuctioneer_Settings.ACL) do
 					print(k);
 				end
 			elseif arg:lower() == "add" then
 				addToACL(select(3, string.split(" ", msg)));
 			elseif arg:lower() == "remove" then
 				removeFromACL(select(3, string.split(" ", msg)));
+			else print("Unknown command ".. arg.."!");
 			end
 		elseif cmd == "playerlist" then
 			SKA_BuildSF();
 			SKA_PlayerList_Editor:Show();
-		elseif cmd == "hidechat" and (tonumber(arg) or (arg:lower()=="y" or arg:lower()=="n")) then
+		elseif cmd == "hidechat" and arg and (tonumber(arg) or (arg:lower()=="y" or arg:lower()=="n")) then
 			if tonumber(arg) == 0 or arg:lower()=="n" then 
-				SKAuctioneer_HideWhispers = false;
+				SKAuctioneer_Settings.HideWhispers = false;
 				print("SKA now shows chat created by auctions.");
 			elseif tonumber(arg) == 1 or arg:lower()=="y" then
-				SKAuctioneer_HideWhispers = true;
+				SKAuctioneer_Settings.HideWhispers = true;
 				print("SKA no longer shows chat created by auctions.");
 			end
-		elseif cmd == "ldb" and (arg:lower()=="y" or arg:lower()=="n") then
+		elseif cmd == "ldb" and arg and (arg:lower()=="y" or arg:lower()=="n") then
 			if arg:lower()=="y" then
-				SKAuctioneer_LDB = true;
+				SKAuctioneer_Settings.LDB = true;
 				print("SKA will now show the distribution interface in raids.");
 			elseif arg:lower()=="n" then
-				SKAuctioneer_LDB = false;
+				SKAuctioneer_Settings.LDB = false;
 				print("SKA will no longer show the distribution interface.");
 			end
+		elseif cmd == "reset" then
+			SKAuctioneer_Settings = {
+				PlayerList = {},
+
+				Channel = "GUILD",
+				
+				AuctionTime = 15,
+				
+				ACL = {}, -- Access control list
+				
+				HideWhispers = true,
+				
+				LDB = true,
+				
+				FirstRun = true
+			};
+			print("Settings have been reset!");
 		elseif cmd == "testmode" then
 			testMode = true;
 			print("Testmode engaged, prepare your anus!");
@@ -359,23 +403,18 @@ end
 --	Filter Whispers created by the addon if setting is enables
 local function filterOutgoing(self, event, ...)
 	local msg = ...;
-	return msg:sub(0, prefix:len()) == prefix and SKAuctioneer_HideWhispers, ...;
+	return msg:sub(0, prefix:len()) == prefix and SKAuctioneer_Settings.HideWhispers, ...;
 end
 
 local function filterIncoming(self, event, ...)
 	local msg = ...;
-	return currentItem and (msg:lower() == "greed" or msg:lower() == "need") and SKAuctioneer_HideWhispers, ...;
+	return currentItem and (msg:lower() == "greed" or msg:lower() == "need") and SKAuctioneer_Settings.HideWhispers, ...;
 end
 
 ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", filterIncoming);
 ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutgoing);
 
 
-
-
---[[ Todo:
-	- Add all settings to a table (SKA_Settings) and parse that as the only SavedVariable
-	END]]
 	
 
 -- GUI STUFF BELOW:
@@ -554,17 +593,17 @@ function SKA_BuildSF()
 	-- Add new content ------------
 	local height = 0;
 	
-	for i=1, #SKAuctioneer_PlayerList do
+	for i=1, #SKAuctioneer_Settings.PlayerList do
 		local frame = newListItem();
 		frame:SetPoint("TOP", frame:GetParent(), "TOP", 0, -((i-1)*frame:GetHeight()));
 		
 		if i == 1 then
 			local _, ButtonUp, ButtonDown = frame:GetChildren();
 			ButtonUp:Hide();
-			if #SKAuctioneer_PlayerList == 1 then
+			if #SKAuctioneer_Settings.PlayerList == 1 then
 				ButtonDown:Hide();
 			end
-		elseif i == #SKAuctioneer_PlayerList then
+		elseif i == #SKAuctioneer_Settings.PlayerList then
 			local _, _, ButtonDown = frame:GetChildren();
 			ButtonDown:Hide();
 		end
@@ -572,7 +611,7 @@ function SKA_BuildSF()
 
 		local NameString, OrderString = frame:GetRegions();
 		
-		NameString:SetText(SKAuctioneer_PlayerList[i]);
+		NameString:SetText(SKAuctioneer_Settings.PlayerList[i]);
 		OrderString:SetText(i..".");
 	
 		
@@ -588,7 +627,7 @@ end
 
 
 function SKA_AddPlayer(name)
-	table.insert(SKAuctioneer_PlayerList, name);
+	table.insert(SKAuctioneer_Settings.PlayerList, name);
 	
 	SKA_BuildSF();
 end
@@ -599,9 +638,9 @@ function SKA_RemovePlayer(frame)
 	local name = NameString:GetText();
 	
 	
-	for i=1, #SKAuctioneer_PlayerList do
-		if name == SKAuctioneer_PlayerList[i] then
-			table.remove(SKAuctioneer_PlayerList, i);
+	for i=1, #SKAuctioneer_Settings.PlayerList do
+		if name == SKAuctioneer_Settings.PlayerList[i] then
+			table.remove(SKAuctioneer_Settings.PlayerList, i);
 			break;
 		end
 	end
@@ -614,13 +653,13 @@ function SKA_SwitchPlayer(frame, switchpos)
 	local NameString, OrderString = frame:GetRegions();
 	local pos = tonumber(string.match(OrderString:GetText(), "^(.+)\.$"));
 	
-	if pos+switchpos <= 0 or pos+switchpos > #SKAuctioneer_PlayerList then return; end
+	if pos+switchpos <= 0 or pos+switchpos > #SKAuctioneer_Settings.PlayerList then return; end
 	
 	local name = NameString:GetText();
 	
 	-- Switch positions
-	SKAuctioneer_PlayerList[pos] = SKAuctioneer_PlayerList[pos+switchpos];
-	SKAuctioneer_PlayerList[pos+switchpos] = name;
+	SKAuctioneer_Settings.PlayerList[pos] = SKAuctioneer_Settings.PlayerList[pos+switchpos];
+	SKAuctioneer_Settings.PlayerList[pos+switchpos] = name;
 	
 	SKA_BuildSF();
 end
