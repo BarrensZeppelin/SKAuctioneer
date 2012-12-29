@@ -32,10 +32,11 @@ If there are no needers, but at least one greeder, SKAuctioneer will ask the gre
 ### How-to:
 Quick-slash: `/ska`
 
+#### For the raid leader(s):
 When you have loot that you want to distribute with SKAuctioneer, there are three ways of doing it:
 
    1. Type `/ska start [itemlink]`    
-      Where [itemlink] is the item you want auctioned.
+      Where `[itemlink]` is the item you want auctioned.
 	  
    2. Have a player on the Access Control List type:    
       `!auction [itemlink]`    
@@ -46,6 +47,10 @@ When you have loot that you want to distribute with SKAuctioneer, there are thre
 
 Ongoing auctions can be cancelled by writing `/ska stop` or by a player on the ACL `!cancel`.	
 Refer to the guide in-game on how to perform other tasks such as setting the Channel which SKAuctioneer should use.
+
+#### For everyone else:
+Once an auction has started and the auctioned item is to your liking, do hesitate to whisper the SKAuctioneer host your status on the item.    
+Simply `/w [SKA Host] <need/greed>` and SKAuctioneer will automatically update your status or add you to the list of needers/greeders.
 
 Now that you know how to control the SKAuctioneer AddOn, start using it!
 
