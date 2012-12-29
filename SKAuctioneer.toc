@@ -1,7 +1,6 @@
 ## Interface: 50100
 ## Title: SKAuctioneer
 ## Notes: Suicide Kings-based Auctioneer addon with rules for the guild: Absolute Zero on Al'Akir(EU)
-## Dependencies: _Timer
 ## SavedVariables: SKAuctioneer_Channel, SKAuctioneer_AuctionTime, SKAuctioneer_ACL, SKAuctioneer_PlayerList, SKAuctioneer_HideWhispers, SKAuctioneer_LDB
 
 

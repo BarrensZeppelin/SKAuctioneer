@@ -1,4 +1,4 @@
-﻿local testMode = true;
+﻿local testMode = false;
 
 local currentItem;
 local takers = {};
@@ -124,7 +124,7 @@ do
 end
 
 do
-	local noTakers = prefix.."Noone wants %s, disenchant it!";
+	local noTakers = prefix.."Noone wants %s!";
 	local greedWinner = prefix.."%s won %s by \"greed\", and thus remains at his SK position.";
 	local needWinner = prefix.."%s won %s by \"need\", and thus suicides to the bottom of the SK lootlist.";
 	
@@ -157,8 +157,9 @@ do
 							break;
 						end
 					end
-					if found then break; else print("Error: Needer not found in the PlayerList!"); end
+					if found then break; end
 				end
+				if not found then print("Error: Needer not found in the PlayerList!"); end
 				
 			else -- kun greeders, roll!
 				greedString = prefix.."No need, only greed;";
@@ -344,6 +345,9 @@ do
 				SKAuctioneer_LDB = false;
 				print("SKA will no longer show the distribution interface.");
 			end
+		elseif cmd == "testmode" then
+			testMode = true;
+			print("Testmode engaged, prepare your anus!");
 		else
 			for i=1, #usage do
 				print(usage[i]);
@@ -430,7 +434,6 @@ local function lootFrame_OnEvent(self)
 		
 		for i=1, GetNumLootItems() do
 			local lootIcon, lootName, lootQuantity, rarity, locked = GetLootSlotInfo(i);
-			local index = 0;
 			
 			if locked ~= 1 and rarity >= lootTreshold and GetLootSlotType(i) == LOOT_SLOT_ITEM then
 				local button = newLootButton(lootIcon);
@@ -454,7 +457,6 @@ local function lootFrame_OnEvent(self)
 				end);
 				
 				
-				index = index+1;
 				validItems = validItems + 1;
 			end
 		end
