@@ -1,6 +1,9 @@
+[homepage]: https://github.com/BarrensZeppelin/SKAuctioneer
+
 SKAuctioneer 
 ============
-created by Oskar Veileborg (Esaya) for the guild Absolute Zero on Al'Akir EU (Horde).
+created by Oskar Veileborg (Esaya) for the guild Absolute Zero on Al'Akir EU (Horde).    
+The official development page is: [SKAuctioneer @ GitHub][homepage]
 
 SKAuctioneer is a lightweight and 100% open-source AddOn for Suicide Kings(SK) loot distribution management in guilds and raid-teams.    
 ### Featuring:
@@ -12,7 +15,7 @@ SKAuctioneer is a lightweight and 100% open-source AddOn for Suicide Kings(SK) l
    - Modifiable output Channel and auction run-time 
    - And a tailored loot distribution interface!
 
-Information about SK loot system can be found here: http://www.wowwiki.com/Suicide_Kings.
+Information about SK loot system can be found here: http://www.wowwiki.com/Suicide_Kings
 
 Usage guide
 -----------
@@ -54,9 +57,14 @@ Refer to the guide in-game on how to perform other tasks such as setting the Cha
 Once an auction has started and the auctioned item is to your liking, do not hesitate to whisper the SKAuctioneer host your status on the item. Simply `/w [SKA Host] <need/greed>` and SKAuctioneer will automatically update your status or add you to the list of needers/greeders.    
 For instance: if I wanted the item, but not enough to let go of my SK position, I would type `/w Apoulsen greed` (In this example Apoulsen is the `[SKA Host]`)    
 If I were to change my mind and decide that I really wanted the item, I could just change to need by typing `/w Apoulsen need`.    
-**Keep in mind** that you can not change your status to greed after you have already needed!
+**Keep in mind**, that you can not change your status to greed after you have already needed!
 
 Now that you know how to control the SKAuctioneer AddOn, start using it!
+
+Help & Suggestions
+------------------
+If you want to contribute in any way shape or form, or if find a bug, feel free to use the Issues tab on the [development page][homepage] on GitHub.
+
 
 Changelog
 ---------
