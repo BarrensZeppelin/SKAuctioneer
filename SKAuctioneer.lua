@@ -5,14 +5,16 @@ local takers = {};
 local prefix = "[SKAuctioneer] ";
 
 
-SKAuctioneer_Settings = {
+SKAuctioneer_Settings_Default = {
 	PlayerList = {},
 
 	Channel = "GUILD",
 	
 	AuctionTime = 15,
 	
-	ACL = {}, -- Access control list
+	ACL = {},
+	
+	AutoGreedRoll = true,
 	
 	HideWhispers = true,
 	
@@ -20,6 +22,8 @@ SKAuctioneer_Settings = {
 	
 	FirstRun = true
 };
+
+SKAuctioneer_Settings = SKAuctioneer_Settings_Default;
 
 local startAuction, endAuction, placeWant, cancelAuction, sendStatus, onEvent;
 
@@ -146,7 +150,7 @@ do
 				suicidePlayer(takers[1].name);
 			end
 		else
-			needers = {};
+			local needers = {};
 			for i=1, #takers do
 				if takers[i].status == "need" then
 					table.insert(needers, takers[i].name);
@@ -169,18 +173,23 @@ do
 				if not found then print("Error: Needer not found in the PlayerList!"); end
 				
 			else -- kun greeders, roll!
-				greedString = prefix.."No need, only greed;";
-				for i=1, #takers do
-					if i == 1 then
-						greedString = greedString.." "..takers[i].name; 
-					elseif i+1 > #takers then
-						greedString = greedString.." and "..takers[i].name;
-					else
-						greedString = greedString..", "..takers[i].name;
+				if SKAuctioneer_Settings.AutoGreedRoll then
+					SendChatMessage(prefix.."The auction for "..currentItem.." has ended, and "..#takers.." people declared greed. SKAuctioneer will find a random winner!", SKAuctioneer_Settings.Channel);
+					_Timer_Schedule(1, SendChatMessage, prefix.."The winner of "..currentItem.." is: "..takers[random(#takers)].name.."!", SKAuctioneer_Settings.Channel);
+				else
+					local greedString = prefix.."No need, only greed;";
+					for i=1, #takers do
+						if i == 1 then
+							greedString = greedString.." "..takers[i].name; 
+						elseif i+1 > #takers then
+							greedString = greedString.." and "..takers[i].name;
+						else
+							greedString = greedString..", "..takers[i].name;
+						end
 					end
+					greedString = greedString.." - /roll  for "..currentItem.." now!";
+					SendChatMessage(greedString, SKAuctioneer_Settings.Channel);
 				end
-				greedString = greedString.." - /roll  for "..currentItem.." now!";
-				SendChatMessage(greedString, SKAuctioneer_Settings.Channel);
 			end
 		end
 		
@@ -290,6 +299,7 @@ do
 	local currTime = "Auction time is currently set to %s seconds";
 	local ACL = "Access Control List:";
 	local usage = {};
+		table.insert(usage, "|cFF42E80CSKAuctioneer|r Usage Guide:");
 		table.insert(usage, "/ska");
 		table.insert(usage, " - start <item> - Starts an auction for the selected item.");
 		table.insert(usage, " - stop - Cancels the current auction.");
@@ -303,6 +313,7 @@ do
 		table.insert(usage, " - playerlist - Shows the Player List editing frame.");
 		table.insert(usage, " - hidechat <Y/N> - Hide whispers by SKA?");
 		table.insert(usage, " - ldb <Y/N> - Use the SKA Loot Distribution Interface?");
+		table.insert(usage, " - autoroll <Y/N> - Should SKAuctioneer find a random winner on greeds?");
 		table.insert(usage, " - reset - Sets settings back to default.");
 	
 	local function addToACL(...)
@@ -372,22 +383,16 @@ do
 				SKAuctioneer_Settings.LDB = false;
 				print("SKA will no longer show the distribution interface.");
 			end
+		elseif cmd == "autoroll" and arg and (arg:lower()=="y" or arg:lower()=="n") then
+			if arg:lower()=="y" then
+				SKAuctioneer_Settings.AutoGreedRoll = true;
+				print("SKA will now automatically find a random winner between greeders.");
+			elseif arg:lower()=="n" then
+				SKAuctioneer_Settings.AutoGreedRoll = false;
+				print("SKA no longer uses Auto Greed Roll.");
+			end
 		elseif cmd == "reset" then
-			SKAuctioneer_Settings = {
-				PlayerList = {},
-
-				Channel = "GUILD",
-				
-				AuctionTime = 15,
-				
-				ACL = {}, -- Access control list
-				
-				HideWhispers = true,
-				
-				LDB = true,
-				
-				FirstRun = true
-			};
+			SKAuctioneer_Settings = SKAuctioneer_Settings_Default;
 			print("Settings have been reset!");
 		elseif cmd == "testmode" then
 			testMode = true;
