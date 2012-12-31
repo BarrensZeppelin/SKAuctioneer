@@ -393,6 +393,7 @@ do
 			end
 		elseif cmd == "reset" then
 			SKAuctioneer_Settings = SKAuctioneer_Settings_Default;
+			SKA_BuildSF();
 			print("Settings have been reset!");
 		elseif cmd == "testmode" then
 			testMode = true;
@@ -635,6 +636,10 @@ function SKA_AddPlayer(name)
 	table.insert(SKAuctioneer_Settings.PlayerList, name);
 	
 	SKA_BuildSF();
+	
+	if #SKAuctioneer_Settings.PlayerList == 2 then
+		SKA_BuildSF();
+	end
 end
 
 
