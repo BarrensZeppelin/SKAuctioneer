@@ -50,6 +50,14 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
+				
+				<FontString inherits="GameFontNormal" text="Click anything to auction it!">
+					<Anchors>
+						<Anchor point="TOP">
+							<Offset> <AbsDimension x="0" y="-25" /> </Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
 			</Layer>
 		</Layers>
 		

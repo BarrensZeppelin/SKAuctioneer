@@ -462,20 +462,18 @@ local function newLootButton(iconTexture)
 end
 
 local function lootFrame_OnEvent(self)
-	local children = { _G["SKA_LootFrame_ButtonFrame"]:GetChildren() };
-	for i=1, #children do
-		removeLootButton(children[i]);
-	end
-	
-
 	local lootmethod, pID = GetLootMethod();
 	local lootTreshold;
 	if IsInRaid() then lootTreshold = GetLootTreshold(); else lootTreshold = 0; end
 	
-	if (lootmethod == "master" and pID == 0) or testMode then
+	local validItems = 0;
+	
+	if (lootmethod == "master" and pID == 0 and SKAuctioneer_Settings.LDB) or testMode then
 		--print("Opened loot. There are "..GetNumLootItems().." item(s) to loot.");
-		
-		local validItems = 0;
+		local children = { _G["SKA_LootFrame_ButtonFrame"]:GetChildren() };
+		for i=1, #children do
+			removeLootButton(children[i]);
+		end
 		
 		for i=1, GetNumLootItems() do
 			local lootIcon, lootName, lootQuantity, rarity, locked = GetLootSlotInfo(i);
@@ -484,7 +482,7 @@ local function lootFrame_OnEvent(self)
 				local button = newLootButton(lootIcon);
 				
 				--Grid positioning
-				button:SetPoint("TOPLEFT", "SKA_LootFrame_ButtonFrame", "TOPLEFT", ((validItems)%5)*42, (floor((validItems)/5))*(-42));
+				button:SetPoint("TOPLEFT", "SKA_LootFrame_ButtonFrame", "TOPLEFT", ((validItems)%5)*42, -10+(floor((validItems)/5))*(-42));
 				
 				button:SetScript("OnClick", function(self) 
 					if startAuction(GetLootSlotLink(i)) then 
@@ -505,11 +503,13 @@ local function lootFrame_OnEvent(self)
 				validItems = validItems + 1;
 			end
 		end
-		
-		if validItems > 0 then
-			SKA_LootFrame:SetHeight(58+ceil(validItems/5)*42);
-			SKA_LootFrame:Show();
-		end
+	end
+	
+	if validItems > 0 then
+		SKA_LootFrame:SetHeight(58+ceil(validItems/5)*42);
+		SKA_LootFrame:Show();
+	else
+		SKA_LootFrame:Hide();
 	end
 end
 
