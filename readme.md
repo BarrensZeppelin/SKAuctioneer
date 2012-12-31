@@ -63,7 +63,7 @@ Now that you know how to control the SKAuctioneer AddOn, start using it!
 
 Help & Suggestions
 ------------------
-If you want to contribute in any way shape or form, or if find a bug, feel free to use the Issues tab on the [development page][homepage] on GitHub.
+If you want to contribute in any way shape or form, or if you find a bug, feel free to use the Issues tab on the [development page][homepage] on GitHub.
 
 
 Changelog
