@@ -1,6 +1,7 @@
 ## Interface: 50100
 ## Title: SKAuctioneer
-## Notes: Suicide Kings-based Auctioneer addon with rules for the guild: Absolute Zero on Al'Akir(EU)
+## Author: BarrensZeppelin
+## Notes: SKAuctioneer is a Suicide Kings-based AddOn for managing and distributing loot under the SK ruleset.
 ## SavedVariables: SKAuctioneer_Settings
 
 
