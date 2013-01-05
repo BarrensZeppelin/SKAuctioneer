@@ -464,7 +464,7 @@ end
 local function lootFrame_OnEvent(self)
 	local lootmethod, pID = GetLootMethod();
 	local lootTreshold;
-	if IsInRaid() then lootTreshold = GetLootTreshold(); else lootTreshold = 0; end
+	if(IsInRaid() and pID) then lootTreshold = GetLootTreshold(); else lootTreshold = 0; end
 	
 	local validItems = 0;
 	
