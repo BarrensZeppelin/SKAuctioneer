@@ -469,7 +469,9 @@ local function lootFrame_OnEvent(self)
 	local validItems = 0;
 	
 	if (lootmethod == "master" and pID == 0 and SKAuctioneer_Settings.LDB) or testMode then
-		--print("Opened loot. There are "..GetNumLootItems().." item(s) to loot.");
+	
+		if testmode then print("Opened loot. There are "..GetNumLootItems().." item(s) to loot."); end
+		
 		local children = { _G["SKA_LootFrame_ButtonFrame"]:GetChildren() };
 		for i=1, #children do
 			removeLootButton(children[i]);
