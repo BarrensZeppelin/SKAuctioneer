@@ -7,8 +7,11 @@
 
 
 
+
 customButtonTemplates.xml
 SKAuctioneer.xml
 SKA_LootFrame.xml
 
+Settings.lua
+VersionCheck.lua
 SKAuctioneer.lua

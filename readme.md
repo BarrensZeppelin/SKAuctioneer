@@ -9,7 +9,7 @@ SKAuctioneer is a lightweight and 100% open-source AddOn for Suicide Kings(SK) l
 ### Featuring:
    - Simple and solid item auctioning
    - Automatic player suicide
-   - SK player list management interface
+   - SK player list management interface - with alt support
    - Ongoing auction status reports (no stealth auctions/no gambling)
    - Shared AddOn control (with the Access Control List)
    - Modifiable output Channel and auction run-time 
@@ -52,6 +52,8 @@ When you have loot that you want to distribute with SKAuctioneer, there are thre
 
 Ongoing auctions can be cancelled by writing `/ska stop` or by a player on the ACL `!cancel`.	
 Refer to the guide in-game on how to perform other tasks such as setting the Channel which SKAuctioneer should use.
+
+As of version 2.0, if you use the main/alt features of the playerlist management features, when you join a raid or a new player joins it, the Player List Management Interface will automatically update and show the present players as the main. This makes it easier to determine which players are raiding currently, and which alts (with class colours) they have available.
 
 #### For everyone else:
 Once an auction has started and the auctioned item is to your liking, do not hesitate to whisper the SKAuctioneer host your status on the item. Simply `/w [SKA Host] <need/greed>` and SKAuctioneer will automatically update your status or add you to the list of needers/greeders.    

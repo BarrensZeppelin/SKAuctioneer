@@ -1,35 +1,8 @@
-﻿--[[ TODO:
-		Make it possible to have alts under the same name on the playerlist
-		]]
-
-local testMode = false;
+﻿local testMode = false;
 
 local currentItem;
 local takers = {};
 local prefix = "[SKAuctioneer] ";
-
-
-SKAuctioneer_Settings_Default = {
-	PlayerList = {},
-	
-	RememberedNames = {},
-
-	Channel = "GUILD",
-	
-	AuctionTime = 15,
-	
-	ACL = {},
-	
-	AutoGreedRoll = true,
-	
-	HideWhispers = true,
-	
-	LDB = true,
-	
-	FirstRun = true
-};
-
-SKAuctioneer_Settings = SKAuctioneer_Settings_Default;
 
 SKAuctioneer_EditMode = "PlayerList";
 
@@ -45,7 +18,7 @@ local function getClassName(name)
 	-- Check guild and raid to see if this guy exists
 	--Raid
 	if IsInRaid() then
-		for i=1, GetNumRaidMembers() do
+		for i=1, GetNumGroupMembers() do
 			local pName, _, _, _, _, class = GetRaidRosterInfo(i);
 			SKAuctioneer_Settings.RememberedNames[pName] = class;
 		end
@@ -267,14 +240,14 @@ end
 -- Function to make alts/mains in the current raid to appear as the first name on the PlayerList 
 local function PlayerList_MainUpdate()
 	if IsInRaid() then
-		for i=1, GetNumRaidMembers() do
+		for i=1, GetNumGroupMembers() do
 			local name = GetRaidRosterInfo(i);
 			local pos = findPlayerInList(name);
 			if pos then
 				if name ~= SKAuctioneer_Settings.PlayerList[pos][1] then
 					for u=2, #SKAuctioneer_Settings.PlayerList[pos] do
 						if SKAuctioneer_Settings.PlayerList[pos][u] == name then
-							table.insert(SKAuctioneer_PlayerList[pos], 1, table.remove(SKAuctioneer_Settings.PlayerList[pos], u)); -- Shift elements
+							table.insert(SKAuctioneer_Settings.PlayerList[pos], 1, table.remove(SKAuctioneer_Settings.PlayerList[pos], u)); -- Shift elements
 							break;
 						end
 					end
@@ -360,6 +333,7 @@ local e = 0;
 local function onUpdate(self, elapsed)
 	if not SKAuctioneer_Settings.FirstRun then
 		frame:SetScript("OnUpdate", nil);
+		SKA_CheckVersion();
 	else
 		e = e + elapsed;
 		if e >= 2 then
@@ -716,8 +690,12 @@ end
 ---------------------------------------
 
 local PlayerList_Editor_Info = SKA_PlayerList_Editor:CreateFontString("Info", ARTWORK, "GameFontNormalLarge");
-PlayerList_Editor_Info:SetPoint("TOPLEFT", 20, -35);
+PlayerList_Editor_Info:SetPoint("TOPLEFT", 20, -30);
 PlayerList_Editor_Info:SetFont("Fonts\\FRIZQT__.TTF", 13);
+
+local PlayerList_Editor_Info2 = SKA_PlayerList_Editor:CreateFontString("Info2", ARTWORK, "GameFontNormal");
+PlayerList_Editor_Info2:SetPoint("TOPLEFT", 30, -43);
+PlayerList_Editor_Info2:SetFont("Fonts\\FRIZQT__.TTF", 11);
 
 -- Populate SKA_PlayerList_Editor_ListFrame
 function SKA_BuildSF()
@@ -730,8 +708,10 @@ function SKA_BuildSF()
 	
 	if SKAuctioneer_EditMode == "PlayerList" then
 		PlayerList_Editor_Info:SetText("Add and remove players from the list:");
+		PlayerList_Editor_Info2:SetText("Click on a name to add alts.");
 	else
 		PlayerList_Editor_Info:SetText("Add and remove alts from "..SKAuctioneer_EditMode..":");
+		PlayerList_Editor_Info2:SetText("Right click to go back.");
 	end
 	
 	
@@ -818,21 +798,25 @@ end);
 
 
 function SKA_AddPlayer(name)
-	if SKAuctioneer_EditMode == "PlayerList" then
-		table.insert(SKAuctioneer_Settings.PlayerList, {name});
-	else
-		local pos = findPlayerInList(SKAuctioneer_EditMode);
-		if pos then
-			table.insert(SKAuctioneer_Settings.PlayerList[pos], name);
+	if not findPlayerInList(name) then
+		if SKAuctioneer_EditMode == "PlayerList" then
+			table.insert(SKAuctioneer_Settings.PlayerList, {name});
+		else
+			local pos = findPlayerInList(SKAuctioneer_EditMode);
+			if pos then
+				table.insert(SKAuctioneer_Settings.PlayerList[pos], name);
+			end
 		end
-	end
-		
-	SKA_BuildSF();
-	
-	
-	---- Some fucked bug idk
-	if #SKAuctioneer_Settings.PlayerList == 2 then
+			
 		SKA_BuildSF();
+		
+		
+		---- Some fucked bug idk
+		if #SKAuctioneer_Settings.PlayerList == 2 then
+			SKA_BuildSF();
+		end
+	else
+		print(name.." is already on the list!");
 	end
 end
 
