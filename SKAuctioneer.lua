@@ -303,10 +303,7 @@ do
 			_Timer_Unschedule(sendStatus);
 			_Timer_Schedule(2, sendStatus);
 			_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_Settings.AuctionTime/2), SKAuctioneer_Settings.Channel);
-		elseif event == "RAID_INSTANCE_WELCOME" or event == "RAID_ROSTER_UPDATE" then
-			-- UPDATE THE PLAYERLIST TO MATCH ALTS / MAINS
-			PlayerList_MainUpdate();
-			SKA_BuildSF();
+		
 		elseif SKAuctioneer_Settings.ACL[sender] then
 			local cmd, arg = msg:match("^!(%w+)%s*(.*)");
 			if cmd and cmd:lower() == "auction" and arg then
@@ -314,6 +311,10 @@ do
 			elseif cmd and cmd:lower() == "cancel" then
 				cancelAuction(sender);
 			end
+		elseif event == "RAID_INSTANCE_WELCOME" or event == "RAID_ROSTER_UPDATE" or event == "PARTY_MEMBERS_CHANGED" or event == "CHAT_MSG_RAID" then
+			-- UPDATE THE PLAYERLIST TO MATCH ALTS / MAINS
+			PlayerList_MainUpdate();
+			SKA_BuildSF();
 		end
 	end
 end
@@ -327,6 +328,7 @@ frame:RegisterEvent("CHAT_MSG_GUILD");
 frame:RegisterEvent("CHAT_MSG_SAY");
 frame:RegisterEvent("RAID_INSTANCE_WELCOME");
 frame:RegisterEvent("RAID_ROSTER_UPDATE");
+frame:RegisterEvent("PARTY_MEMBERS_CHANGED");
 frame:SetScript("OnEvent", onEvent);
 
 local e = 0;
@@ -540,7 +542,9 @@ local function lootFrame_OnEvent(self)
 		
 		local children = { _G["SKA_LootFrame_ButtonFrame"]:GetChildren() };
 		for i=1, #children do
-			removeLootButton(children[i]);
+			if children[i]:IsVisible() then
+				removeLootButton(children[i]);
+			end
 		end
 		
 		for i=1, GetNumLootItems() do
@@ -702,7 +706,9 @@ function SKA_BuildSF()
 	-- Clean up current content
 	local children = { SKA_PlayerList_Editor_ListFrame_SF_Content:GetChildren() };
 	for i=1, #children do
-		removeListItem(children[i]);
+		if children[i]:IsVisible() then
+			removeListItem(children[i]);
+		end
 	end
 	----------------------------
 	

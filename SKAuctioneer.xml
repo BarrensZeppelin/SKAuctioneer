@@ -237,6 +237,7 @@
 												self:SetMinMaxValues(1, (content:GetHeight()-self:GetParent():GetHeight()));
 												self:Show();
 											else
+												self:SetMinMaxValues(1, 1);
 												self:Hide();
 											end
 										end
