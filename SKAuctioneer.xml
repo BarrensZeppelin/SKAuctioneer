@@ -60,6 +60,16 @@
 					</OnClick>
 				</Scripts>
 			</Button>
+			
+			<Button name="NameButton" text="asd">
+				<Anchors>
+					<Anchor point="LEFT">
+						<Offset> <AbsDimension x="40" y="0" /> </Offset>
+					</Anchor>
+				</Anchors>
+				
+				<NormalFont style="GameFontNormal" />
+			</Button>
 		</Frames>
 	</Frame>
 	<!--	__________________________________________________________________________	-->
@@ -82,7 +92,7 @@
 		</Scripts>
 		
 		<Size>
-			<AbsDimension x="320" y="310" />
+			<AbsDimension x="320" y="330" />
 		</Size>
 		
 		<Anchors>
@@ -127,7 +137,7 @@
 					</Anchors>
 				</Texture>
 				
-				<FontString inherits="GameFontNormal" text="[SKA] Player List:">
+				<FontString inherits="GameFontNormal" text="[SKA] Player List">
 					<Anchors>
 						<Anchor point="TOP" relativeTo="$parentTitle">
 							<Offset>
@@ -157,7 +167,7 @@
 				
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset> <AbsDimension x="15" y="-40" /> </Offset>
+						<Offset> <AbsDimension x="15" y="-60" /> </Offset>
 					</Anchor>
 				</Anchors>
 				
@@ -283,12 +293,6 @@
 				</Anchors>
 				
 				<NormalFont style="GameFontNormal" />
-				
-				<Scripts>
-					<OnClick>
-						self:GetParent():Hide();
-					</OnClick>
-				</Scripts>
 			</Button>
 		</Frames>
 	</Frame>

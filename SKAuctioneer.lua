@@ -1,4 +1,8 @@
-﻿local testMode = false;
+﻿--[[ TODO:
+		Make it possible to have alts under the same name on the playerlist
+		]]
+
+local testMode = false;
 
 local currentItem;
 local takers = {};
@@ -7,6 +11,8 @@ local prefix = "[SKAuctioneer] ";
 
 SKAuctioneer_Settings_Default = {
 	PlayerList = {},
+	
+	RememberedNames = {},
 
 	Channel = "GUILD",
 	
@@ -24,6 +30,81 @@ SKAuctioneer_Settings_Default = {
 };
 
 SKAuctioneer_Settings = SKAuctioneer_Settings_Default;
+
+SKAuctioneer_EditMode = "PlayerList";
+
+local function getClassName(name)
+	-- First a very simple check to see if the player is available somewhere
+	local _, class = UnitClass(name);
+	if class then
+		SKAuctioneer_Settings.RememberedNames[name] = class;
+	end
+
+	
+	class = SKAuctioneer_Settings.RememberedNames[name]
+	if class then
+		return class;
+	end
+	
+	
+	-- Check guild and raid to see if this guy exists
+	--Raid
+	if IsInRaid() then
+		for i=1, GetNumRaidMembers() do
+			local pName, _, _, _, _, class = GetRaidRosterInfo(i);
+			SKAuctioneer_Settings.RememberedNames[pName] = class;
+		end
+	end
+	
+	--Guild
+	for i=1, GetNumGuildMembers() do
+		local pName, _, _, level, _, _, _, _, _, _, class = GetGuildRosterInfo(i);
+		if level == 90 then
+			SKAuctioneer_Settings.RememberedNames[pName] = class;
+		end
+	end
+	----------------------------------
+	
+	return SKAuctioneer_Settings.RememberedNames[name];
+end
+
+
+local function findPlayerInList(name)
+	for i=1, #SKAuctioneer_Settings.PlayerList do
+		for u=1, #SKAuctioneer_Settings.PlayerList[i] do
+			if SKAuctioneer_Settings.PlayerList[i][u] == name then
+				return i;
+			end
+		end
+	end
+	return nil;
+end
+
+
+local function findFirstPlayerInList(nameTable)
+	if #nameTable <= 0 then print("Internal error: nameTable size <= 0"); return nil; end
+	
+	for i=1, #SKAuctioneer_Settings.PlayerList do
+		for u=1, #SKAuctioneer_Settings.PlayerList[i] do
+			for k=1, #nameTable do
+				if #SKAuctioneer_Settings.PlayerList[i][u] == nameTable[k] then
+					return nameTable[k];
+				end
+			end
+		end
+	end
+	
+	return nil;
+end
+
+
+local function suicidePlayer(name)
+	local pos = findPlayerInList(name);
+	if pos then
+		table.insert(SKAuctioneer_Settings.PlayerList, table.remove(SKAuctioneer_Settings.PlayerList, pos));
+	end
+end
+
 
 local startAuction, endAuction, placeWant, cancelAuction, sendStatus, onEvent;
 
@@ -78,15 +159,6 @@ do
 		if #greeders > 0 then SendChatMessage(printGreedStatus:format(greedString), SKAuctioneer_Settings.Channel); end
 		_Timer_Unschedule(endAuction); 	_Timer_Schedule(10, endAuction); -- Reschedule endAuction to end in 10 seconds, so people have time to react
 		SendChatMessage(auctionProgress:format(currentItem, 10), SKAuctioneer_Settings.Channel);
-	end
-end
-
-local function suicidePlayer(name)
-	for i=1, #SKAuctioneer_Settings.PlayerList do
-		if name == SKAuctioneer_Settings.PlayerList[i] then
-			table.insert(SKAuctioneer_Settings.PlayerList, table.remove(SKAuctioneer_Settings.PlayerList, i));
-			break;
-		end
 	end
 end
 
@@ -147,7 +219,11 @@ do
 				SendChatMessage(greedWinner:format(takers[1].name, currentItem), SKAuctioneer_Settings.Channel);
 			else
 				SendChatMessage(needWinner:format(takers[1].name, currentItem), SKAuctioneer_Settings.Channel);
-				suicidePlayer(takers[1].name);
+				if findPlayerInList(takers[1].name) then
+					suicidePlayer(takers[1].name);
+				else
+					print("Could not find player \""..takers[1].name.."\" in the SKAuctioneer Player List, did you forget to add him?");
+				end
 			end
 		else
 			local needers = {};
@@ -158,19 +234,13 @@ do
 			end
 			
 			if #needers > 0 then -- dette stykke kode kører igennem listen fra 1 til maks og giver item til den første der optræder
-				local found = false;
-				for i=1, #SKAuctioneer_Settings.PlayerList do
-					for u=1, #needers do
-						if needers[u] == SKAuctioneer_Settings.PlayerList[i] then
-							SendChatMessage(needWinner:format(needers[u], currentItem), SKAuctioneer_Settings.Channel);
-							found = true;
-							suicidePlayer(needers[u]);
-							break;
-						end
-					end
-					if found then break; end
+				local winnerName = findFirstPlayerInList(needers);
+				if winnerName then
+					SendChatMessage(needWinner:format(winnerName, currentItem), SKAuctioneer_Settings.Channel);
+					suicidePlayer(winnerName);
+				else
+					print("Error: Needer not found in the PlayerList");
 				end
-				if not found then print("Error: Needer not found in the PlayerList!"); end
 				
 			else -- kun greeders, roll!
 				if SKAuctioneer_Settings.AutoGreedRoll then
@@ -197,6 +267,28 @@ do
 		currentItem = nil;
 	end
 end
+
+
+-- Function to make alts/mains in the current raid to appear as the first name on the PlayerList 
+local function PlayerList_MainUpdate()
+	if IsInRaid() then
+		for i=1, GetNumRaidMembers() do
+			local name = GetRaidRosterInfo(i);
+			local pos = findPlayerInList(name);
+			if pos then
+				if name ~= SKAuctioneer_Settings.PlayerList[pos][1] then
+					for u=2, #SKAuctioneer_Settings.PlayerList[pos] do
+						if SKAuctioneer_Settings.PlayerList[pos][u] == name then
+							table.insert(SKAuctioneer_PlayerList[pos], 1, table.remove(SKAuctioneer_Settings.PlayerList[pos], u)); -- Shift elements
+							break;
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
 
 do
 	local greedUnavailable = prefix.."You can no longer place/change to greed on %s since it has already been needed.";
@@ -243,7 +335,10 @@ do
 			_Timer_Unschedule(sendStatus);
 			_Timer_Schedule(2, sendStatus);
 			_Timer_Unschedule(SendChatMessage, noBidsYet:format(currentItem, SKAuctioneer_Settings.AuctionTime/2), SKAuctioneer_Settings.Channel);
-		
+		elseif event == "RAID_INSTANCE_WELCOME" or event == "RAID_ROSTER_UPDATE" then
+			-- UPDATE THE PLAYERLIST TO MATCH ALTS / MAINS
+			PlayerList_MainUpdate();
+			SKA_BuildSF();
 		elseif SKAuctioneer_Settings.ACL[sender] then
 			local cmd, arg = msg:match("^!(%w+)%s*(.*)");
 			if cmd and cmd:lower() == "auction" and arg then
@@ -262,6 +357,8 @@ frame:RegisterEvent("CHAT_MSG_RAID_LEADER");
 frame:RegisterEvent("CHAT_MSG_OFFICER");
 frame:RegisterEvent("CHAT_MSG_GUILD");
 frame:RegisterEvent("CHAT_MSG_SAY");
+frame:RegisterEvent("RAID_INSTANCE_WELCOME");
+frame:RegisterEvent("RAID_ROSTER_UPDATE");
 frame:SetScript("OnEvent", onEvent);
 
 local e = 0;
@@ -564,6 +661,29 @@ local function removeListItem(f)
 	table.insert(ListItemPool, f);
 end
 
+
+local function onEnterListItem(self)
+	if SKAuctioneer_EditMode == "PlayerList" then
+		GameTooltip:SetOwner(self, "ANCHOR_TOP");
+		local pos = findPlayerInList(self:GetFontString():GetText());
+		if #SKAuctioneer_Settings.PlayerList[pos] >=2 then
+			GameTooltip:SetText("Alts:");
+			for i=2, #SKAuctioneer_Settings.PlayerList[pos] do
+				local class = getClassName(SKAuctioneer_Settings.PlayerList[pos][i]);
+				if class then
+					local Color = RAID_CLASS_COLORS[class];
+					GameTooltip:AddLine(SKAuctioneer_Settings.PlayerList[pos][i], Color.r, Color.g, Color.b, 1);
+				else
+					GameTooltip:AddLine(SKAuctioneer_Settings.PlayerList[pos][i], 1.0, 0.82, 0, 1);
+				end
+			end
+			GameTooltip:Show();
+		else
+			GameTooltip:SetText("No Alts");
+		end
+	end
+end
+
 local function newListItem()
 	local f = table.remove(ListItemPool);
 	
@@ -572,11 +692,23 @@ local function newListItem()
 		f:SetPoint("LEFT"); f:SetPoint("RIGHT");
 		f:SetHeight(25);
 		
-		local fString = f:CreateFontString("NameString", ARTWORK, "GameFontNormal");
-		fString:SetPoint("LEFT", 70, 0);
-		
-		fString = f:CreateFontString("OrderString", ARTWORK, "GameFontNormal");
+		local fString = f:CreateFontString("OrderString", ARTWORK, "GameFontNormal");
 		fString:SetPoint("LEFT", 5, 0);
+		
+		local _, _, _, NameButton = f:GetChildren();
+		NameButton:SetHeight(NameButton:GetParent():GetHeight());
+		
+		NameButton:SetScript("OnEnter", onEnterListItem);
+		NameButton:SetScript("OnLeave", function() GameTooltip:Hide(); end);
+		NameButton:SetScript("OnClick", function(self, button)
+			if SKAuctioneer_EditMode == "PlayerList" then
+				SKAuctioneer_EditMode = self:GetFontString():GetText();
+				SKA_BuildSF();
+			elseif button == "RightButton" then
+				SKAuctioneer_EditMode = "PlayerList";
+				SKA_BuildSF();
+			end
+		end);
 	else
 		local _, b1, b2 = f:GetChildren();
 		b1:Show(); b2:Show();
@@ -587,6 +719,9 @@ local function newListItem()
 end
 ---------------------------------------
 
+local PlayerList_Editor_Info = SKA_PlayerList_Editor:CreateFontString("Info", ARTWORK, "GameFontNormalLarge");
+PlayerList_Editor_Info:SetPoint("TOPLEFT", 20, -35);
+PlayerList_Editor_Info:SetFont("Fonts\\FRIZQT__.TTF", 13);
 
 -- Populate SKA_PlayerList_Editor_ListFrame
 function SKA_BuildSF()
@@ -597,33 +732,77 @@ function SKA_BuildSF()
 	end
 	----------------------------
 	
+	if SKAuctioneer_EditMode == "PlayerList" then
+		PlayerList_Editor_Info:SetText("Add and remove players from the list:");
+	else
+		PlayerList_Editor_Info:SetText("Add and remove alts from "..SKAuctioneer_EditMode..":");
+	end
+	
 	
 	-- Add new content ------------
 	local height = 0;
 	
-	for i=1, #SKAuctioneer_Settings.PlayerList do
-		local frame = newListItem();
-		frame:SetPoint("TOP", frame:GetParent(), "TOP", 0, -((i-1)*frame:GetHeight()));
-		
-		if i == 1 then
-			local _, ButtonUp, ButtonDown = frame:GetChildren();
+	if SKAuctioneer_EditMode ~= "PlayerList" then
+		local pos = findPlayerInList(SKAuctioneer_EditMode);
+		for i=1, #SKAuctioneer_Settings.PlayerList[pos] do
+			local frame = newListItem();
+			frame:SetPoint("TOP", frame:GetParent(), "TOP", 0, -((i-1)*frame:GetHeight()));
+			
+			local _, ButtonUp, ButtonDown, NameButton = frame:GetChildren();
 			ButtonUp:Hide();
-			if #SKAuctioneer_Settings.PlayerList == 1 then
+			ButtonDown:Hide();
+			
+			local NameString = NameButton:GetFontString();
+			NameString:SetText(SKAuctioneer_Settings.PlayerList[pos][i]);
+			local class = getClassName(SKAuctioneer_Settings.PlayerList[pos][i]);
+			if class then
+				local Color = RAID_CLASS_COLORS[class];
+				NameString:SetTextColor(Color.r, Color.g, Color.b, 1.0);
+			else
+				NameString:SetTextColor(1.0, 0.82, 0, 1.0);
+			end
+			NameButton:SetWidth(NameString:GetStringWidth());
+			
+			
+			local OrderString = frame:GetRegions();
+			OrderString:SetText("#");
+		
+			
+			height = height + frame:GetHeight();
+		end
+	else
+		for i=1, #SKAuctioneer_Settings.PlayerList do
+			local frame = newListItem();
+			frame:SetPoint("TOP", frame:GetParent(), "TOP", 0, -((i-1)*frame:GetHeight()));
+			
+			local _, ButtonUp, ButtonDown, NameButton = frame:GetChildren();
+			if i == 1 then
+				ButtonUp:Hide();
+				if #SKAuctioneer_Settings.PlayerList == 1 then
+					ButtonDown:Hide();
+				end
+			elseif i == #SKAuctioneer_Settings.PlayerList then
 				ButtonDown:Hide();
 			end
-		elseif i == #SKAuctioneer_Settings.PlayerList then
-			local _, _, ButtonDown = frame:GetChildren();
-			ButtonDown:Hide();
+			
+			local NameString = NameButton:GetFontString();
+			NameString:SetText(SKAuctioneer_Settings.PlayerList[i][1]);
+			local class = getClassName(SKAuctioneer_Settings.PlayerList[i][1]);
+			if class then
+				local Color = RAID_CLASS_COLORS[class];
+				NameString:SetTextColor(Color.r, Color.g, Color.b, 1.0);
+			else
+				NameString:SetTextColor(1.0, 0.82, 0, 1.0);
+			end
+			NameButton:SetWidth(NameString:GetStringWidth());
+			
+			
+			local OrderString = frame:GetRegions();
+			OrderString:SetText(i..".");
+		
+			
+			height = height + frame:GetHeight();
 		end
-		
-
-		local NameString, OrderString = frame:GetRegions();
-		
-		NameString:SetText(SKAuctioneer_Settings.PlayerList[i]);
-		OrderString:SetText(i..".");
-	
-		
-		height = height + frame:GetHeight();
 	end
 	-------------------------------
 	
@@ -632,13 +811,30 @@ function SKA_BuildSF()
 	SKA_UpdateSlider(SKA_PlayerList_Editor_ListFrame_SF_Content);
 end
 
+SKA_PlayerList_Editor_CancelButton:SetScript("OnClick", function(self)
+	if SKAuctioneer_EditMode ~= "PlayerList" then
+		SKAuctioneer_EditMode = "PlayerList";
+		SKA_BuildSF();
+	else
+		self:GetParent():Hide();
+	end
+end);
 
 
 function SKA_AddPlayer(name)
-	table.insert(SKAuctioneer_Settings.PlayerList, name);
-	
+	if SKAuctioneer_EditMode == "PlayerList" then
+		table.insert(SKAuctioneer_Settings.PlayerList, {name});
+	else
+		local pos = findPlayerInList(SKAuctioneer_EditMode);
+		if pos then
+			table.insert(SKAuctioneer_Settings.PlayerList[pos], name);
+		end
+	end
+		
 	SKA_BuildSF();
 	
+	
+	---- Some fucked bug idk
 	if #SKAuctioneer_Settings.PlayerList == 2 then
 		SKA_BuildSF();
 	end
@@ -646,14 +842,19 @@ end
 
 
 function SKA_RemovePlayer(frame)	
-	local NameString = frame:GetRegions();
-	local name = NameString:GetText();
+	local _, _, _, NameButton = frame:GetChildren();
+	local name = NameButton:GetFontString():GetText();
 	
-	
-	for i=1, #SKAuctioneer_Settings.PlayerList do
-		if name == SKAuctioneer_Settings.PlayerList[i] then
-			table.remove(SKAuctioneer_Settings.PlayerList, i);
-			break;
+	local pos = findPlayerInList(name);
+	if SKAuctioneer_EditMode == "PlayerList" then
+		if pos then
+			table.remove(SKAuctioneer_Settings.PlayerList, pos);
+		end
+	else
+		if pos then
+			for i=1, #SKAuctioneer_Settings.PlayerList[pos] do
+				if SKAuctioneer_Settings.PlayerList[pos][i] == name then table.remove(SKAuctioneer_Settings.PlayerList[pos], i); break; end
+			end
 		end
 	end
 	
@@ -662,16 +863,18 @@ end
 
 
 function SKA_SwitchPlayer(frame, switchpos)
-	local NameString, OrderString = frame:GetRegions();
+	local OrderString = frame:GetRegions();
 	local pos = tonumber(string.match(OrderString:GetText(), "^(.+)\.$"));
 	
 	if pos+switchpos <= 0 or pos+switchpos > #SKAuctioneer_Settings.PlayerList then return; end
 	
-	local name = NameString:GetText();
+	local _, _, _, NameButton = frame:GetChildren();
+	local name = NameButton:GetFontString():GetText();
 	
 	-- Switch positions
+	local temp = SKAuctioneer_Settings.PlayerList[pos];
 	SKAuctioneer_Settings.PlayerList[pos] = SKAuctioneer_Settings.PlayerList[pos+switchpos];
-	SKAuctioneer_Settings.PlayerList[pos+switchpos] = name;
+	SKAuctioneer_Settings.PlayerList[pos+switchpos] = temp;
 	
 	SKA_BuildSF();
 end
