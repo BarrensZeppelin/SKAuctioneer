@@ -697,6 +697,7 @@ local function newListItem()
 		
 		local _, _, _, NameButton = f:GetChildren();
 		NameButton:SetHeight(NameButton:GetParent():GetHeight());
+		NameButton:RegisterForClicks("RightButtonDown", "RightButtonUp", "LeftButtonUp", "LeftButtonDown");
 		
 		NameButton:SetScript("OnEnter", onEnterListItem);
 		NameButton:SetScript("OnLeave", function() GameTooltip:Hide(); end);
@@ -853,7 +854,17 @@ function SKA_RemovePlayer(frame)
 	else
 		if pos then
 			for i=1, #SKAuctioneer_Settings.PlayerList[pos] do
-				if SKAuctioneer_Settings.PlayerList[pos][i] == name then table.remove(SKAuctioneer_Settings.PlayerList[pos], i); break; end
+				if SKAuctioneer_Settings.PlayerList[pos][i] == name then
+					if name == SKAuctioneer_EditMode and #SKAuctioneer_Settings.PlayerList[pos] >= 2 then
+						SKAuctioneer_EditMode = SKAuctioneer_Settings.PlayerList[pos][2];
+					end
+					table.remove(SKAuctioneer_Settings.PlayerList[pos], i);
+					if #SKAuctioneer_Settings.PlayerList[pos] == 0 then
+						table.remove(SKAuctioneer_Settings.PlayerList, pos);
+						SKAuctioneer_EditMode = "PlayerList";
+					end
+					break;
+				end
 			end
 		end
 	end
