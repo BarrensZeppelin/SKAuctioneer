@@ -38,11 +38,6 @@ local function getClassName(name)
 	local _, class = UnitClass(name);
 	if class then
 		SKAuctioneer_Settings.RememberedNames[name] = class;
-	end
-
-	
-	class = SKAuctioneer_Settings.RememberedNames[name]
-	if class then
 		return class;
 	end
 	
