@@ -20,7 +20,7 @@ local function getClassName(name)
 	if IsInRaid() then
 		for i=1, GetNumGroupMembers() do
 			local pName, _, _, _, _, class = GetRaidRosterInfo(i);
-			SKAuctioneer_Settings.RememberedNames[pName] = class;
+			if(pName and class) SKAuctioneer_Settings.RememberedNames[pName] = class; end
 		end
 	end
 	
@@ -716,7 +716,13 @@ function SKA_BuildSF()
 		PlayerList_Editor_Info:SetText("Add and remove players from the list:");
 		PlayerList_Editor_Info2:SetText("Click on a name to add alts.");
 	else
-		PlayerList_Editor_Info:SetText("Add and remove alts from "..SKAuctioneer_EditMode..":");
+		local class = getClassName(SKAuctioneer_EditMode);
+		if class then
+			local Color = RAID_CLASS_COLORS[class];
+			PlayerList_Editor_Info:SetText("Add and remove alts from |c"..Color.colorStr:Upper()..SKAuctioneer_EditMode.."|r:");
+		else
+			PlayerList_Editor_Info:SetText("Add and remove alts from "..SKAuctioneer_EditMode..":");
+		end
 		PlayerList_Editor_Info2:SetText("Right click to go back.");
 	end
 	
