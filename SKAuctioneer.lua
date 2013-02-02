@@ -20,7 +20,7 @@ local function getClassName(name)
 	if IsInRaid() then
 		for i=1, GetNumGroupMembers() do
 			local pName, _, _, _, _, class = GetRaidRosterInfo(i);
-			if(pName and class) SKAuctioneer_Settings.RememberedNames[pName] = class; end
+			if(pName and class) then SKAuctioneer_Settings.RememberedNames[pName] = class; end
 		end
 	end
 	
@@ -508,7 +508,6 @@ local function newLootButton(iconTexture)
 		f = CreateFrame("Button", nil, SKA_LootFrame_ButtonFrame, "LootButtonTemplate");
 		local regions = { f:GetRegions() };
 		for i=1, #regions do
-			--print(regions[i]:GetName());
 			if regions[i]:GetName() == "SKA_LootFrame_ButtonFrameNameFrame" then
 				regions[i]:Hide();
 			elseif regions[i]:GetName() == "SKA_LootFrame_ButtonFrameIconTexture" then
@@ -518,7 +517,6 @@ local function newLootButton(iconTexture)
 	else
 		local regions = { f:GetRegions() };
 		for i=1, #regions do
-			--print(regions[i]:GetName());
 			if regions[i]:GetName() == "SKA_LootFrame_ButtonFrameIconTexture" then
 				regions[i]:SetTexture(iconTexture);
 			end
@@ -532,7 +530,14 @@ end
 local function lootFrame_OnEvent(self)
 	local lootmethod, pID = GetLootMethod();
 	local lootTreshold;
-	if(IsInRaid() and pID) then lootTreshold = GetLootTreshold(); else lootTreshold = 0; end
+	if(IsInRaid() and pID) then 
+		lootTreshold = GetLootTreshold(); 
+	else if not testMode then
+		SKA_LootFrame:Hide();
+		return;
+	else
+		lootTreshold = 0;
+	end
 	
 	local validItems = 0;
 	
