@@ -3,7 +3,7 @@
 ## Author: BarrensZeppelin
 ## Notes: SKAuctioneer is a Suicide Kings-based AddOn for managing and distributing loot under the SK ruleset.
 ## SavedVariables: SKAuctioneer_Settings
-## Version: 2.0
+## Version: 2.1
 
 
 
