@@ -532,7 +532,7 @@ local function lootFrame_OnEvent(self)
 	local lootTreshold;
 	if(IsInRaid() and pID) then 
 		lootTreshold = GetLootTreshold(); 
-	else if not testMode then
+	elseif not testMode then
 		SKA_LootFrame:Hide();
 		return;
 	else
