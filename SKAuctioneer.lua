@@ -530,7 +530,7 @@ end
 local function lootFrame_OnEvent(self)
 	local lootmethod, pID = GetLootMethod();
 	local lootTreshold;
-	if(IsInRaid() and pID) then 
+	if(IsInRaid() and pID == 0) then 
 		lootTreshold = GetLootTreshold(); 
 	elseif not testMode then
 		SKA_LootFrame:Hide();
@@ -541,7 +541,7 @@ local function lootFrame_OnEvent(self)
 	
 	local validItems = 0;
 	
-	if (lootmethod == "master" and pID == 0 and SKAuctioneer_Settings.LDB) or testMode then
+	if (lootmethod == "master" and SKAuctioneer_Settings.LDB) or testMode then
 	
 		if testmode then print("Opened loot. There are "..GetNumLootItems().." item(s) to loot."); end
 		

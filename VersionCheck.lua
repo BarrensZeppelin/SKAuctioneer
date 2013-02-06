@@ -25,6 +25,7 @@ function SKA_CheckVersion()
 		if prevSettings.LDB then SKAuctioneer_Settings.LDB = prevSettings.LDB; end
 		if prevSettings.FirstRun then SKAuctioneer_Settings.FirstRun = prevSettings.FirstRun; end
 
+		SKAuctioneer_Settings.Version = version;
 		print("|cFF42E80CSKAuctioneer|r was successfully updated from version |cFFBF2633".. prevSettings.Version .."|r to |cFF599C00".. version .."|r\nYour settings were preserved!");
 	end
 end
